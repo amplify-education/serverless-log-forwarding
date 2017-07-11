@@ -1,0 +1,42 @@
+{
+  "name": "serverless-log-forwarding",
+  "version": "1.0.0",
+  "description": "a serverless plugin to forward logs to given lambda function",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "eslint": "^3.18.0",
+    "eslint-config-airbnb": "^14.1.0",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jsx-a11y": "^5.0.1",
+    "eslint-plugin-react": "^7.0.1",
+    "istanbul": "^0.4.5",
+    "mocha": "^2.2.5"
+  },
+  "scripts": {
+    "test": "node ./node_modules/istanbul/lib/cli.js cover _mocha -- -R spec && node ./node_modules/istanbul/lib/cli.js check-coverage --line 70 coverage/coverage.json",
+    "lint": "eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amplify-education/serverless-log-forwarding.git"
+  },
+  "keywords": [
+    "serverless",
+    "serverless",
+    "plugin",
+    "logs"
+  ],
+  "author": "Amplify Education",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/amplify-education/serverless-log-forwarding/issues"
+  },
+  "homepage": "https://github.com/amplify-education/serverless-log-forwarding#readme"
+}
