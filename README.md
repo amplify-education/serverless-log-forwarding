@@ -33,6 +33,8 @@ plugins:
 custom:
   logForwarding:
     destinationARN: '[ARN of Lambda Function to forward logs to]'
+    # optional:
+    filterPattern: `[filter pattern for logs that are sent to Lambda function]'
 ```
 
 ## Running Tests

@@ -37,6 +37,7 @@ class LogForwardingPlugin {
     if (service.custom.logForwarding.destinationARN == null) {
       throw new Error('Serverless-log-forwarding is not configured correctly. Please see README for proper setup.');
     }
+    const filterPattern = service.custom.logForwarding.filterPattern || '';
     // Get options and parameters to make resources object
     const serviceName = service.service;
     const arn = service.custom.logForwarding.destinationARN;
@@ -59,7 +60,7 @@ class LogForwardingPlugin {
     for (let i = 0; i < functions.length; i += 1) {
       /* merge new SubscriptionFilter with current resources object */
       const subscriptionFilter = LogForwardingPlugin.makeSubscriptionFilter(serviceName,
-        stage, arn, functions[i]);
+        stage, arn, functions[i], filterPattern);
       _.extend(resourceObj, subscriptionFilter);
     }
     return resourceObj;
@@ -72,16 +73,17 @@ class LogForwardingPlugin {
    * @param  {String} stage        stage this lambda is being deployed to
    * @param  {String} arn          arn of the lambda to forward to
    * @param  {String} functionName name of function to make SubscriptionFilter for
-   * @return {Object}              SubscriptionFilter
+   * @param  {String} filterPattern filter pattern for the Subscription
+   * @return {Object}               SubscriptionFilter
    */
-  static makeSubscriptionFilter(serviceName, stage, arn, functionName) {
+  static makeSubscriptionFilter(serviceName, stage, arn, functionName, filterPattern) {
     const logGroupName = `/aws/lambda/${serviceName}-${stage}-${functionName}`;
     const filter = {};
     filter[`SubscriptionFilter${functionName}`] = {
       Type: 'AWS::Logs::SubscriptionFilter',
       Properties: {
         DestinationArn: arn,
-        FilterPattern: '',
+        FilterPattern: filterPattern,
         LogGroupName: logGroupName,
       },
       DependsOn: [
