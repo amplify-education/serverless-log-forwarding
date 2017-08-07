@@ -6,6 +6,10 @@ const expect = chai.expect;
 const correctConfig = {
   destinationARN: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
 };
+const correctConfigWithFilterPattern = {
+  destinationARN: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
+  filterPattern: 'Test Pattern',
+};
 const constructPluginResources = (logForwarding) => {
   const serverless = {
     service: {
@@ -26,6 +30,7 @@ const constructPluginResources = (logForwarding) => {
       functions: {
         testFunctionOne: {
           name: 'functionOne',
+          filterPattern: 'Pattern',
         },
         testFunctionTwo: {
           name: 'functionTwo',
@@ -141,6 +146,48 @@ describe('Given a serverless config', () => {
           Properties: {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
             FilterPattern: '',
+            LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionTwo',
+          },
+          DependsOn: [
+            'LogForwardingLambdaPermission',
+          ],
+        },
+      },
+    };
+    plugin.updateResources();
+    expect(plugin.serverless.service.resources).to.eql(expectedResources);
+  });
+  it('uses the filterPattern property if set', () => {
+    const plugin = constructPluginResources(correctConfigWithFilterPattern);
+    const expectedResources = {
+      Resources: {
+        TestExistingFilter: {
+          Type: 'AWS:Test:Filter',
+        },
+        LogForwardingLambdaPermission: {
+          Type: 'AWS::Lambda::Permission',
+          Properties: {
+            FunctionName: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
+            Action: 'lambda:InvokeFunction',
+            Principal: 'logs.us-moon-1.amazonaws.com',
+          },
+        },
+        SubscriptionFiltertestFunctionOne: {
+          Type: 'AWS::Logs::SubscriptionFilter',
+          Properties: {
+            DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
+            FilterPattern: 'Test Pattern',
+            LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionOne',
+          },
+          DependsOn: [
+            'LogForwardingLambdaPermission',
+          ],
+        },
+        SubscriptionFiltertestFunctionTwo: {
+          Type: 'AWS::Logs::SubscriptionFilter',
+          Properties: {
+            DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
+            FilterPattern: 'Test Pattern',
             LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionTwo',
           },
           DependsOn: [
