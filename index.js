@@ -43,7 +43,9 @@ class LogForwardingPlugin {
     // Get options and parameters to make resources object
     const serviceName = service.service;
     const arn = service.custom.logForwarding.destinationARN;
-    const stage = options.stage && options.stage.length > 0 ? options.stage : service.provider.stage;
+    const stage = options.stage && options.stage.length > 0 
+                  ? options.stage 
+                  : service.provider.stage;
     // Get list of all functions in this lambda
     const functions = _.keys(service.functions);
     const principal = `logs.${service.provider.region}.amazonaws.com`;
