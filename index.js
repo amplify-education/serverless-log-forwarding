@@ -1,8 +1,9 @@
 const _ = require('underscore');
 
 class LogForwardingPlugin {
-  constructor(serverless) {
+  constructor(serverless, options) {
     this.serverless = serverless;
+    this.options = options;
 
     /* Hooks tell Serverless when to do what */
     this.hooks = {
@@ -33,6 +34,7 @@ class LogForwardingPlugin {
    */
   createResourcesObj() {
     const service = this.serverless.service;
+    const options = this.options;
     // Checks if the serverless file is setup correctly
     if (service.custom.logForwarding.destinationARN == null) {
       throw new Error('Serverless-log-forwarding is not configured correctly. Please see README for proper setup.');
@@ -41,7 +43,9 @@ class LogForwardingPlugin {
     // Get options and parameters to make resources object
     const serviceName = service.service;
     const arn = service.custom.logForwarding.destinationARN;
-    const stage = service.provider.stage;
+    const stage = options.stage && options.stage.length > 0
+                  ? options.stage
+                  : service.provider.stage;
     // Get list of all functions in this lambda
     const functions = _.keys(service.functions);
     const principal = `logs.${service.provider.region}.amazonaws.com`;
