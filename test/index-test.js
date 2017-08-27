@@ -13,6 +13,11 @@ const correctConfigWithFilterPattern = {
   destinationARN: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
   filterPattern: 'Test Pattern',
 };
+const correctConfigWithStageFilter = {
+  destinationARN: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
+  filterPattern: 'Test Pattern',
+  stages: ['production'],
+};
 const constructPluginResources = (logForwarding) => {
   const serverless = {
     service: {
@@ -273,6 +278,18 @@ describe('Given a serverless config', () => {
           DependsOn: [
             'LogForwardingLambdaPermission',
           ],
+        },
+      },
+    };
+    plugin.updateResources();
+    expect(plugin.serverless.service.resources).to.eql(expectedResources);
+  });
+  it('uses stage filter if set', () => {
+    const plugin = constructPluginResources(correctConfigWithStageFilter);
+    const expectedResources = {
+      Resources: {
+        TestExistingFilter: {
+          Type: 'AWS:Test:Filter',
         },
       },
     };
