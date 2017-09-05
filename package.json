@@ -1,6 +1,6 @@
 {
   "name": "serverless-log-forwarding",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "a serverless plugin to forward logs to given lambda function",
   "main": "index.js",
   "directories": {

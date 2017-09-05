@@ -18,6 +18,15 @@ class LogForwardingPlugin {
    * Updates CloudFormation resources with log forwarding
    */
   updateResources() {
+    // check if stage is specified in config
+    const service = this.serverless.service;
+    const stage = this.options.stage;
+    if (service.custom.logForwarding.stages &&
+      service.custom.logForwarding.stages.indexOf(stage) === -1) {
+      this.serverless.cli.log(`Log Forwarding is ignored for ${stage} stage`);
+      return;
+    }
+
     this.serverless.cli.log('Updating Log Forwarding Resources...');
     const resourceObj = this.createResourcesObj();
     if (this.serverless.service.resources === undefined) {
@@ -46,8 +55,8 @@ class LogForwardingPlugin {
     const serviceName = service.service;
     const arn = service.custom.logForwarding.destinationARN;
     const stage = options.stage && options.stage.length > 0
-                  ? options.stage
-                  : service.provider.stage;
+      ? options.stage
+      : service.provider.stage;
     // Get list of all functions in this lambda
     const functions = _.keys(service.functions);
     const principal = `logs.${service.provider.region}.amazonaws.com`;
