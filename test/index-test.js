@@ -19,7 +19,7 @@ const correctConfigWithStageFilter = {
   stages: ['production'],
 };
 
-const awsProvider = (provider) => {
+const awsProviderMock = (provider) => {
   if (provider !== 'aws') {
     throw new Error('provider must be aws');
   }
@@ -58,7 +58,7 @@ const constructPluginResources = (logForwarding) => {
       },
       service: 'test-service',
     },
-    getProvider: awsProvider,
+    getProvider: awsProviderMock,
     cli: {
       log() {
       },
@@ -87,7 +87,7 @@ const constructPluginNoResources = (logForwarding) => {
       },
       service: 'test-service',
     },
-    getProvider: awsProvider,
+    getProvider: awsProviderMock,
     cli: {
       log() {
       },
@@ -124,7 +124,7 @@ const constructPluginResourcesWithParam = (logForwarding) => {
       },
       service: 'test-service',
     },
-    getProvider: awsProvider,
+    getProvider: awsProviderMock,
     cli: {
       log() {
       },
