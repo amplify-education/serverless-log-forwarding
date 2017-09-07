@@ -19,118 +19,98 @@ const correctConfigWithStageFilter = {
   stages: ['production'],
 };
 
-const awsProviderMock = (provider) => {
-  if (provider !== 'aws') {
-    throw new Error('provider must be aws');
-  }
-  return {
-    naming: {
-      getLogGroupLogicalId: functionName => `${functionName.charAt(0).toUpperCase()}${functionName.slice(1)}LogGroup`,
+const Serverless = require('serverless');
+const AwsProvider = require('serverless/lib/plugins/aws/provider/awsProvider');
+
+const createServerless = (options, service) => {
+  const serverless = new Serverless(options);
+  serverless.cli = {
+    log() {
     },
   };
+  new AwsProvider(serverless, options); // eslint-disable-line no-new
+  serverless.service.update(service);
+  serverless.service.setFunctionNames(options);
+  return serverless;
 };
 
 const constructPluginResources = (logForwarding) => {
-  const serverless = {
-    service: {
-      provider: {
-        region: 'us-moon-1',
-        stage: 'test-stage',
-      },
-      custom: {
-        logForwarding,
-      },
-      resources: {
-        Resources: {
-          TestExistingFilter: {
-            Type: 'AWS:Test:Filter',
-          },
-        },
-      },
-      functions: {
-        testFunctionOne: {
-          name: 'functionOne',
-          filterPattern: 'Pattern',
-        },
-        testFunctionTwo: {
-          name: 'functionTwo',
-        },
-      },
-      service: 'test-service',
+  const options = {};
+  const serverless = createServerless(options, {
+    provider: {
+      region: 'us-moon-1',
+      stage: 'test-stage',
     },
-    getProvider: awsProviderMock,
-    cli: {
-      log() {
+    custom: {
+      logForwarding,
+    },
+    resources: {
+      Resources: {
+        TestExistingFilter: {
+          Type: 'AWS:Test:Filter',
+        },
       },
     },
-  };
-  return new LogForwardingPlugin(serverless, {});
+    functions: {
+      testFunctionOne: {
+        filterPattern: 'Pattern',
+      },
+      testFunctionTwo: {
+      },
+    },
+    service: 'test-service',
+  });
+  return new LogForwardingPlugin(serverless, options);
 };
 const constructPluginNoResources = (logForwarding) => {
-  const serverless = {
-    service: {
-      provider: {
-        region: 'us-moon-1',
-        stage: 'test-stage',
-      },
-      custom: {
-        logForwarding,
-      },
-      resources: undefined,
-      functions: {
-        testFunctionOne: {
-          name: 'functionOne',
-        },
-        testFunctionTwo: {
-          name: 'functionTwo',
-        },
-      },
-      service: 'test-service',
+  const options = {};
+  const serverless = createServerless(options, {
+    provider: {
+      region: 'us-moon-1',
+      stage: 'test-stage',
     },
-    getProvider: awsProviderMock,
-    cli: {
-      log() {
+    custom: {
+      logForwarding,
+    },
+    functions: {
+      testFunctionOne: {
+      },
+      testFunctionTwo: {
       },
     },
-  };
-  return new LogForwardingPlugin(serverless, {});
+    service: 'test-service',
+  });
+  serverless.service.resources = undefined;
+  return new LogForwardingPlugin(serverless, options);
 };
 
 const constructPluginResourcesWithParam = (logForwarding) => {
-  const serverless = {
-    service: {
-      provider: {
-        region: 'us-moon-1',
-        stage: 'test-stage',
-      },
-      custom: {
-        logForwarding,
-      },
-      resources: {
-        Resources: {
-          TestExistingFilter: {
-            Type: 'AWS:Test:Filter',
-          },
-        },
-      },
-      functions: {
-        testFunctionOne: {
-          name: 'functionOne',
-          filterPattern: 'Pattern',
-        },
-        testFunctionTwo: {
-          name: 'functionTwo',
-        },
-      },
-      service: 'test-service',
+  const options = { stage: 'dev' };
+  const serverless = createServerless(options, {
+    provider: {
+      region: 'us-moon-1',
+      stage: 'test-stage',
     },
-    getProvider: awsProviderMock,
-    cli: {
-      log() {
+    custom: {
+      logForwarding,
+    },
+    resources: {
+      Resources: {
+        TestExistingFilter: {
+          Type: 'AWS:Test:Filter',
+        },
       },
     },
-  };
-  return new LogForwardingPlugin(serverless, { stage: 'dev' });
+    functions: {
+      testFunctionOne: {
+        filterPattern: 'Pattern',
+      },
+      testFunctionTwo: {
+      },
+    },
+    service: 'test-service',
+  });
+  return new LogForwardingPlugin(serverless, options);
 };
 
 describe('Given a serverless config', () => {
