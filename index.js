@@ -53,6 +53,7 @@ class LogForwardingPlugin {
     const filterPattern = service.custom.logForwarding.filterPattern || '';
     // Get options and parameters to make resources object
     const serviceName = service.service;
+    const awsProvider = this.serverless.getProvider('aws');
     const arn = service.custom.logForwarding.destinationARN;
     const stage = options.stage && options.stage.length > 0
       ? options.stage
@@ -74,8 +75,9 @@ class LogForwardingPlugin {
     };
     for (let i = 0; i < functions.length; i += 1) {
       /* merge new SubscriptionFilter with current resources object */
+      const functionLogGroupId = awsProvider.naming.getLogGroupLogicalId(functions[i]);
       const subscriptionFilter = LogForwardingPlugin.makeSubscriptionFilter(serviceName,
-        stage, arn, functions[i], filterPattern);
+        stage, arn, functions[i], filterPattern, functionLogGroupId);
       _.extend(resourceObj, subscriptionFilter);
     }
     return resourceObj;
@@ -89,9 +91,11 @@ class LogForwardingPlugin {
    * @param  {String} arn          arn of the lambda to forward to
    * @param  {String} functionName name of function to make SubscriptionFilter for
    * @param  {String} filterPattern filter pattern for the Subscription
+   * @param  {Object} functionLogGroupId name of the function Log Group to add as a dependency
    * @return {Object}               SubscriptionFilter
    */
-  static makeSubscriptionFilter(serviceName, stage, arn, functionName, filterPattern) {
+  static makeSubscriptionFilter(serviceName, stage, arn, functionName, filterPattern,
+    functionLogGroupId) {
     const logGroupName = `/aws/lambda/${serviceName}-${stage}-${functionName}`;
     const filter = {};
     filter[`SubscriptionFilter${functionName}`] = {
@@ -103,6 +107,7 @@ class LogForwardingPlugin {
       },
       DependsOn: [
         'LogForwardingLambdaPermission',
+        functionLogGroupId,
       ],
     };
     return filter;
