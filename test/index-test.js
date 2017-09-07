@@ -20,17 +20,15 @@ const correctConfigWithStageFilter = {
 };
 
 const awsProvider = (provider) => {
-  if (provider != 'aws') {
+  if (provider !== 'aws') {
     throw new Error('provider must be aws');
   }
   return {
     naming: {
-      getLogGroupLogicalId: (functionName) => {
-        return `${functionName.charAt(0).toUpperCase()}${functionName.slice(1)}LogGroup`;
-      }
-    }
+      getLogGroupLogicalId: functionName => `${functionName.charAt(0).toUpperCase()}${functionName.slice(1)}LogGroup`,
+    },
   };
-}
+};
 
 const constructPluginResources = (logForwarding) => {
   const serverless = {
@@ -160,7 +158,7 @@ describe('Given a serverless config', () => {
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
-            'TestFunctionOneLogGroup'
+            'TestFunctionOneLogGroup',
           ],
         },
         SubscriptionFiltertestFunctionTwo: {
@@ -172,7 +170,7 @@ describe('Given a serverless config', () => {
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
-            'TestFunctionTwoLogGroup'
+            'TestFunctionTwoLogGroup',
           ],
         },
       },
@@ -204,7 +202,7 @@ describe('Given a serverless config', () => {
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
-            'TestFunctionOneLogGroup'
+            'TestFunctionOneLogGroup',
           ],
         },
         SubscriptionFiltertestFunctionTwo: {
@@ -216,7 +214,7 @@ describe('Given a serverless config', () => {
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
-            'TestFunctionTwoLogGroup'
+            'TestFunctionTwoLogGroup',
           ],
         },
       },
@@ -245,7 +243,7 @@ describe('Given a serverless config', () => {
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
-            'TestFunctionOneLogGroup'
+            'TestFunctionOneLogGroup',
           ],
         },
         SubscriptionFiltertestFunctionTwo: {
@@ -257,7 +255,7 @@ describe('Given a serverless config', () => {
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
-            'TestFunctionTwoLogGroup'
+            'TestFunctionTwoLogGroup',
           ],
         },
       },
@@ -289,7 +287,7 @@ describe('Given a serverless config', () => {
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
-            'TestFunctionOneLogGroup'
+            'TestFunctionOneLogGroup',
           ],
         },
         SubscriptionFiltertestFunctionTwo: {
@@ -301,7 +299,7 @@ describe('Given a serverless config', () => {
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
-            'TestFunctionTwoLogGroup'
+            'TestFunctionTwoLogGroup',
           ],
         },
       },
