@@ -129,7 +129,7 @@ describe('Given a serverless config', () => {
             Principal: 'logs.us-moon-1.amazonaws.com',
           },
         },
-        SubscriptionFiltertestFunctionOne: {
+        SubscriptionFilterTestFunctionOne: {
           Type: 'AWS::Logs::SubscriptionFilter',
           Properties: {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
@@ -141,7 +141,7 @@ describe('Given a serverless config', () => {
             'TestFunctionOneLogGroup',
           ],
         },
-        SubscriptionFiltertestFunctionTwo: {
+        SubscriptionFilterTestFunctionTwo: {
           Type: 'AWS::Logs::SubscriptionFilter',
           Properties: {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
@@ -173,7 +173,7 @@ describe('Given a serverless config', () => {
             Principal: 'logs.us-moon-1.amazonaws.com',
           },
         },
-        SubscriptionFiltertestFunctionOne: {
+        SubscriptionFilterTestFunctionOne: {
           Type: 'AWS::Logs::SubscriptionFilter',
           Properties: {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-dev-forward',
@@ -185,7 +185,7 @@ describe('Given a serverless config', () => {
             'TestFunctionOneLogGroup',
           ],
         },
-        SubscriptionFiltertestFunctionTwo: {
+        SubscriptionFilterTestFunctionTwo: {
           Type: 'AWS::Logs::SubscriptionFilter',
           Properties: {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-dev-forward',
@@ -214,7 +214,7 @@ describe('Given a serverless config', () => {
             Principal: 'logs.us-moon-1.amazonaws.com',
           },
         },
-        SubscriptionFiltertestFunctionOne: {
+        SubscriptionFilterTestFunctionOne: {
           Type: 'AWS::Logs::SubscriptionFilter',
           Properties: {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
@@ -226,7 +226,7 @@ describe('Given a serverless config', () => {
             'TestFunctionOneLogGroup',
           ],
         },
-        SubscriptionFiltertestFunctionTwo: {
+        SubscriptionFilterTestFunctionTwo: {
           Type: 'AWS::Logs::SubscriptionFilter',
           Properties: {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
@@ -258,7 +258,7 @@ describe('Given a serverless config', () => {
             Principal: 'logs.us-moon-1.amazonaws.com',
           },
         },
-        SubscriptionFiltertestFunctionOne: {
+        SubscriptionFilterTestFunctionOne: {
           Type: 'AWS::Logs::SubscriptionFilter',
           Properties: {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
@@ -270,7 +270,7 @@ describe('Given a serverless config', () => {
             'TestFunctionOneLogGroup',
           ],
         },
-        SubscriptionFiltertestFunctionTwo: {
+        SubscriptionFilterTestFunctionTwo: {
           Type: 'AWS::Logs::SubscriptionFilter',
           Properties: {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
