@@ -10,7 +10,7 @@ class LogForwardingPlugin {
 
     /* Hooks tell Serverless when to do what */
     this.hooks = {
-      'before:deploy:initialize': this.updateResources.bind(this),
+      'package:initialize': this.updateResources.bind(this),
     };
   }
 
