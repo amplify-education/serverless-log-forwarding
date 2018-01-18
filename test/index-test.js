@@ -12,6 +12,7 @@ const correctConfigFromParam = {
 const correctConfigWithFilterPattern = {
   destinationARN: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
   filterPattern: 'Test Pattern',
+  normalizedFilterID: false,
 };
 const correctConfigWithStageFilter = {
   destinationARN: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
@@ -258,7 +259,7 @@ describe('Given a serverless config', () => {
             Principal: 'logs.us-moon-1.amazonaws.com',
           },
         },
-        SubscriptionFilterTestFunctionOne: {
+        SubscriptionFiltertestFunctionOne: {
           Type: 'AWS::Logs::SubscriptionFilter',
           Properties: {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
@@ -270,7 +271,7 @@ describe('Given a serverless config', () => {
             'TestFunctionOneLogGroup',
           ],
         },
-        SubscriptionFilterTestFunctionTwo: {
+        SubscriptionFiltertestFunctionTwo: {
           Type: 'AWS::Logs::SubscriptionFilter',
           Properties: {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',

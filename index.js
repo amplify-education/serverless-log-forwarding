@@ -50,11 +50,13 @@ class LogForwardingPlugin {
    */
   createResourcesObj() {
     const service = this.serverless.service;
+    const logForwarding = service.custom.logForwarding;
     // Checks if the serverless file is setup correctly
-    if (service.custom.logForwarding.destinationARN == null) {
+    if (logForwarding.destinationARN == null) {
       throw new Error('Serverless-log-forwarding is not configured correctly. Please see README for proper setup.');
     }
-    const filterPattern = service.custom.logForwarding.filterPattern || '';
+    const filterPattern = logForwarding.filterPattern || '';
+    const normalizedFilterID = !(logForwarding.normalizedFilterID === false);
     // Get options and parameters to make resources object
     const arn = service.custom.logForwarding.destinationARN;
     // Get list of all functions in this lambda
@@ -74,7 +76,11 @@ class LogForwardingPlugin {
     };
     for (let i = 0; i < functions.length; i += 1) {
       /* merge new SubscriptionFilter with current resources object */
-      const subscriptionFilter = this.makeSubscriptionFilter(arn, functions[i], filterPattern);
+      const subscriptionFilter = this.makeSubscriptionFilter(functions[i], {
+        arn,
+        filterPattern,
+        normalizedFilterID,
+      });
       _.extend(resourceObj, subscriptionFilter);
     }
     return resourceObj;
@@ -83,22 +89,27 @@ class LogForwardingPlugin {
 
   /**
    * Makes a Subscription Filter object for given function name
-   * @param  {String} arn          arn of the lambda to forward to
    * @param  {String} functionName name of function to make SubscriptionFilter for
-   * @param  {String} filterPattern filter pattern for the Subscription
+   * @param  {Object} options with
+   *                          arn: arn of the lambda to forward to
+   *                          filterPattern: filter pattern for the Subscription
+   *                          normalizedFilterID: whether to use normalized FuncName as filter ID
    * @return {Object}               SubscriptionFilter
    */
-  makeSubscriptionFilter(arn, functionName, filterPattern) {
+  makeSubscriptionFilter(functionName, options) {
     const functionObject = this.serverless.service.getFunction(functionName);
-    const logGroupName = this.provider.naming.getLogGroupName(functionObject.name);
-    const filterLogicalId = `SubscriptionFilter${this.provider.naming.getNormalizedFunctionName(functionName)}`;
-    const functionLogGroupId = this.provider.naming.getLogGroupLogicalId(functionName);
+    const naming = this.provider.naming;
+    const logGroupName = naming.getLogGroupName(functionObject.name);
+    const filterName =
+      options.normalizedFilterID ? naming.getNormalizedFunctionName(functionName) : functionName;
+    const filterLogicalId = `SubscriptionFilter${filterName}`;
+    const functionLogGroupId = naming.getLogGroupLogicalId(functionName);
     const filter = {};
     filter[filterLogicalId] = {
       Type: 'AWS::Logs::SubscriptionFilter',
       Properties: {
-        DestinationArn: arn,
-        FilterPattern: filterPattern,
+        DestinationArn: options.arn,
+        FilterPattern: options.filterPattern,
         LogGroupName: logGroupName,
       },
       DependsOn: [
