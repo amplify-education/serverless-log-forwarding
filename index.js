@@ -50,13 +50,12 @@ class LogForwardingPlugin {
    */
   createResourcesObj() {
     const service = this.serverless.service;
-    const logForwarding = service.custom.logForwarding;
     // Checks if the serverless file is setup correctly
-    if (logForwarding.destinationARN == null) {
+    if (service.custom.logForwarding.destinationARN == null) {
       throw new Error('Serverless-log-forwarding is not configured correctly. Please see README for proper setup.');
     }
-    const filterPattern = logForwarding.filterPattern || '';
-    const normalizedFilterID = !(logForwarding.normalizedFilterID === false);
+    const filterPattern = service.custom.logForwarding.filterPattern || '';
+    const normalizedFilterID = !(service.custom.logForwarding.normalizedFilterID === false);
     // Get options and parameters to make resources object
     const arn = service.custom.logForwarding.destinationARN;
     // Get list of all functions in this lambda
@@ -98,12 +97,13 @@ class LogForwardingPlugin {
    */
   makeSubscriptionFilter(functionName, options) {
     const functionObject = this.serverless.service.getFunction(functionName);
-    const naming = this.provider.naming;
-    const logGroupName = naming.getLogGroupName(functionObject.name);
-    const filterName =
-      options.normalizedFilterID ? naming.getNormalizedFunctionName(functionName) : functionName;
+    const logGroupName = this.provider.naming.getLogGroupName(functionObject.name);
+    const filterName = options.normalizedFilterID ?
+          this.provider.naming.getNormalizedFunctionName(functionName)
+          : functionName;
+    this.serverless.cli.log(`Filter name: ${filterName}`)
     const filterLogicalId = `SubscriptionFilter${filterName}`;
-    const functionLogGroupId = naming.getLogGroupLogicalId(functionName);
+    const functionLogGroupId = this.provider.naming.getLogGroupLogicalId(functionName);
     const filter = {};
     filter[filterLogicalId] = {
       Type: 'AWS::Logs::SubscriptionFilter',
