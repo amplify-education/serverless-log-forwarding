@@ -99,8 +99,8 @@ class LogForwardingPlugin {
     const functionObject = this.serverless.service.getFunction(functionName);
     const logGroupName = this.provider.naming.getLogGroupName(functionObject.name);
     const filterName = options.normalizedFilterID ?
-          this.provider.naming.getNormalizedFunctionName(functionName)
-          : functionName;
+      this.provider.naming.getNormalizedFunctionName(functionName)
+      : functionName;
     const filterLogicalId = `SubscriptionFilter${filterName}`;
     const functionLogGroupId = this.provider.naming.getLogGroupLogicalId(functionName);
     const filter = {};
