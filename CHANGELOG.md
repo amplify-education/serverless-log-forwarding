@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 
+## [1.1.8] - 2018-07-30
+
+### Added
+- Added option to support filename as filter logic id, called `normalizedFilterID`. True by default.
+
+
 ## [1.1.7] - 2018-07-30
 
 ### Added
