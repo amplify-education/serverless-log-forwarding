@@ -36,6 +36,7 @@ custom:
     destinationARN: '[ARN of Lambda Function to forward logs to]'
     # optional:
     filterPattern: '[filter pattern for logs that are sent to Lambda function]'
+    normalizedFilterID: true # whether to use normalized function name as filter ID
     stages:
       - '[name of the stage to apply log forwarding]'
       - '[another stage name to filter]'
