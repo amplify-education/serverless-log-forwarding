@@ -14,7 +14,6 @@ class LogForwardingPlugin {
     };
   }
 
-
   /**
    * Updates CloudFormation resources with log forwarding
    */
@@ -43,7 +42,6 @@ class LogForwardingPlugin {
     this.serverless.cli.log('Log Forwarding Resources Updated');
   }
 
-
   /**
    * Creates CloudFormation resources object with log forwarding
    * @return {Object} resources object
@@ -59,7 +57,6 @@ class LogForwardingPlugin {
     // Get options and parameters to make resources object
     const arn = service.custom.logForwarding.destinationARN;
     // Get list of all functions in this lambda
-    const functions = _.keys(service.functions);
     const principal = `logs.${service.provider.region}.amazonaws.com`;
     // Generate resources object for each function
     // Only one lambda permission is needed
@@ -73,18 +70,25 @@ class LogForwardingPlugin {
         },
       },
     };
-    for (let i = 0; i < functions.length; i += 1) {
-      /* merge new SubscriptionFilter with current resources object */
-      const subscriptionFilter = this.makeSubscriptionFilter(functions[i], {
-        arn,
-        filterPattern,
-        normalizedFilterID,
+        /* get list of all functions in this lambda
+      and filter by those which explicitly declare logForwarding = false
+    */
+    _.keys(service.functions)
+      .filter((func) => {
+        const logForwarding = this.serverless.service.getFunction(func).logForwarding;
+        return typeof logForwarding === 'undefined' || logForwarding === true;
+      })
+      .forEach((func) => {
+        const subscriptionFilter = this.makeSubscriptionFilter(func, {
+          arn,
+          filterPattern,
+          normalizedFilterID,
+        });
+        /* merge new SubscriptionFilter with current resources object */
+        _.extend(resourceObj, subscriptionFilter);
       });
-      _.extend(resourceObj, subscriptionFilter);
-    }
     return resourceObj;
   }
-
 
   /**
    * Makes a Subscription Filter object for given function name
