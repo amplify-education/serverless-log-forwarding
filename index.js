@@ -71,7 +71,7 @@ class LogForwardingPlugin {
       },
     };
     /* get list of all functions in this lambda
-      and filter by those which explicitly declare logForwarding = false
+      and filter by those which explicitly declare logForwarding.enabled = false
     */
     _.keys(service.functions)
       .filter((func) => {
