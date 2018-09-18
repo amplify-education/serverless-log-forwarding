@@ -75,8 +75,8 @@ class LogForwardingPlugin {
     */
     _.keys(service.functions)
       .filter((func) => {
-        const { logForwarding } = this.serverless.service.getFunction(func);
-        return typeof logForwarding === 'undefined' || logForwarding === true;
+        const { logForwarding = {} } = this.serverless.service.getFunction(func);
+        return typeof logForwarding.enabled === 'undefined' || logForwarding.enabled === true;
       })
       .forEach((func) => {
         const subscriptionFilter = this.makeSubscriptionFilter(func, {

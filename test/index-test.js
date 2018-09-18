@@ -289,15 +289,22 @@ describe('Given a serverless config', () => {
     expect(plugin.serverless.service.resources).to.eql(expectedResources);
   });
 
-  it('excludes functions with logForwarding=false from AWS::Logs::SubscriptionFilter output', () => {
+  it('excludes functions with logForwarding.enabled=false from AWS::Logs::SubscriptionFilter output', () => {
     const plugin = constructPluginResources(correctConfigWithFilterPattern, {
       testFunctionOne: {
       },
       testFunctionTwo: {
-        logForwarding: true,
+        logForwarding: {},
       },
       testFunctionThree: {
-        logForwarding: false,
+        logForwarding: {
+          enabled: true,
+        },
+      },
+      testFunctionFour: {
+        logForwarding: {
+          enabled: false,
+        },
       },
     });
     const expectedResources = {
@@ -335,6 +342,18 @@ describe('Given a serverless config', () => {
           DependsOn: [
             'LogForwardingLambdaPermission',
             'TestFunctionTwoLogGroup',
+          ],
+        },
+        SubscriptionFiltertestFunctionThree: {
+          Type: 'AWS::Logs::SubscriptionFilter',
+          Properties: {
+            DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
+            FilterPattern: 'Test Pattern',
+            LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionThree',
+          },
+          DependsOn: [
+            'LogForwardingLambdaPermission',
+            'TestFunctionThreeLogGroup',
           ],
         },
       },
