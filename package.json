@@ -1,6 +1,6 @@
 {
   "name": "serverless-log-forwarding",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "a serverless plugin to forward logs to given lambda function",
   "main": "index.js",
   "directories": {
@@ -17,8 +17,8 @@
     "eslint-plugin-jsx-a11y": "^3.0.2",
     "eslint-plugin-react": "^6.10.3",
     "istanbul": "^0.4.5",
-    "mocha": "^2.2.5",
-    "serverless": "^1.20.2"
+    "mocha": "^5.2.0",
+    "serverless": "^1.32.0"
   },
   "scripts": {
     "test": "node ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- -R spec && node ./node_modules/istanbul/lib/cli.js check-coverage --line 70 coverage/coverage.json",
