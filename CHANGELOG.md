@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.1.9] - 2018-10-09
+
 ### Added
 
 - Added support for per-function exclusion by setting `functions.function.logForwarding.enabled = false` for the given function.
+
+### Changed
+
+- Updated npm dependencies to fix security vulnerabilities
 
 ## [1.1.8] - 2018-07-30
 
