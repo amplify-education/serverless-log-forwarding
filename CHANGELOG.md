@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [1.2.1] - 2019-10-09
+## [1.2.2] - 2018-10-24
+
+### Added
+
+- Added option, called `disabledLambdaPermission`, to support disabling the creation of a AWS::Lambda::Permission. False by default.
+
+## [1.2.1] - 2018-10-09
 
 ### Changed
 
