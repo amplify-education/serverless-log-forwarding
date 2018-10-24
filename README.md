@@ -46,6 +46,7 @@ custom:
     stages:
       - '[name of the stage to apply log forwarding]'
       - '[another stage name to filter]'
+    disabledLambdaPermission: false # whether to disable creation of the AWS::Lambda::Permission for the destinationARN (when policy size limits are a concern)
 
 functions:
   myFunction:
