@@ -19,6 +19,10 @@ const correctConfigWithStageFilter = {
   filterPattern: 'Test Pattern',
   stages: ['production'],
 };
+const correctConfigWithDisabledLambdaPermission = {
+  destinationARN: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
+  disabledLambdaPermission: true,
+};
 
 const Serverless = require('serverless');
 const AwsProvider = require('serverless/lib/plugins/aws/provider/awsProvider');
@@ -368,6 +372,42 @@ describe('Given a serverless config', () => {
       Resources: {
         TestExistingFilter: {
           Type: 'AWS:Test:Filter',
+        },
+      },
+    };
+    plugin.updateResources();
+    expect(plugin.serverless.service.resources).to.eql(expectedResources);
+  });
+
+
+  it('uses the disabledLambdaPermission property if set to not include the LogForwardingLambdaPermission', () => {
+    const plugin = constructPluginResources(correctConfigWithDisabledLambdaPermission);
+    const expectedResources = {
+      Resources: {
+        TestExistingFilter: {
+          Type: 'AWS:Test:Filter',
+        },
+        SubscriptionFilterTestFunctionOne: {
+          Type: 'AWS::Logs::SubscriptionFilter',
+          Properties: {
+            DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
+            FilterPattern: '',
+            LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionOne',
+          },
+          DependsOn: [
+            'TestFunctionOneLogGroup',
+          ],
+        },
+        SubscriptionFilterTestFunctionTwo: {
+          Type: 'AWS::Logs::SubscriptionFilter',
+          Properties: {
+            DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
+            FilterPattern: '',
+            LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionTwo',
+          },
+          DependsOn: [
+            'TestFunctionTwoLogGroup',
+          ],
         },
       },
     };
