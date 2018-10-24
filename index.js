@@ -63,10 +63,11 @@ class LogForwardingPlugin {
     const resourceObj = {};
 
     // Only one lambda permission is needed if it is not disabled
-    // The Lambda permission should only be disabled if this plugin is used in numerous (e.g. 70+) serverless projects
-    // that deploy to the same destinationARN within the same AWS account. There is a 20kb function policy limit that may
-    // be exceeded by the destination function policy in this case.
-    // If disabled, the user will be expected to create this lambda permission for the destination function by other means
+    // The Lambda permission should only be disabled if this plugin is used in numerous (e.g. 70+)
+    // serverless projects that deploy to the same destinationARN within the same AWS account.
+    // There is a 20kb function policy limit that may be exceeded by the destination function
+    // policy in this case. If disabled, the user will be expected to create this lambda permission
+    // for the destination function by other means
     if (!disabledLambdaPermission) {
       _.extend(resourceObj, {
         LogForwardingLambdaPermission: {
@@ -107,7 +108,7 @@ class LogForwardingPlugin {
    *                          arn: arn of the lambda to forward to
    *                          filterPattern: filter pattern for the Subscription
    *                          normalizedFilterID: whether to use normalized FuncName as filter ID
-   *                          dependsOn: array of additional CloudFormation template resources the filter should depend on
+   *                          dependsOn: array of additional resources the filter should depend on
    * @return {Object}               SubscriptionFilter
    */
   makeSubscriptionFilter(functionName, options) {
