@@ -54,6 +54,7 @@ class LogForwardingPlugin {
     }
     const filterPattern = service.custom.logForwarding.filterPattern || '';
     const normalizedFilterID = !(service.custom.logForwarding.normalizedFilterID === false);
+    const roleArn = service.custom.logForwarding.roleArn;
     // Get options and parameters to make resources object
     const arn = service.custom.logForwarding.destinationARN;
     // Get list of all functions in this lambda
@@ -85,7 +86,11 @@ class LogForwardingPlugin {
           normalizedFilterID,
         });
         /* merge new SubscriptionFilter with current resources object */
-        _.extend(resourceObj, subscriptionFilter);
+        if (roleArn) {
+          _.extend(roleArn, subscriptionFilter);
+        } else {
+          _.extend(resourceObj, subscriptionFilter);
+        }
       });
     return resourceObj;
   }
@@ -108,18 +113,30 @@ class LogForwardingPlugin {
     const filterLogicalId = `SubscriptionFilter${filterName}`;
     const functionLogGroupId = this.provider.naming.getLogGroupLogicalId(functionName);
     const filter = {};
-    filter[filterLogicalId] = {
-      Type: 'AWS::Logs::SubscriptionFilter',
-      Properties: {
-        DestinationArn: options.arn,
-        FilterPattern: options.filterPattern,
-        LogGroupName: logGroupName,
-      },
-      DependsOn: [
-        'LogForwardingLambdaPermission',
-        functionLogGroupId,
-      ],
-    };
+    if (options.roleArn) {
+      filter[filterLogicalId] = {
+        Type: 'AWS::Logs::SubscriptionFilter',
+        Properties: {
+          RoleArn: options.roleArn,
+          DestinationArn: options.arn,
+          FilterPattern: options.filterPattern,
+          LogGroupName: logGroupName,
+        },
+      };
+    } else {
+      filter[filterLogicalId] = {
+        Type: 'AWS::Logs::SubscriptionFilter',
+        Properties: {
+          DestinationArn: options.arn,
+          FilterPattern: options.filterPattern,
+          LogGroupName: logGroupName,
+        },
+        DependsOn: [
+          'LogForwardingLambdaPermission',
+          functionLogGroupId,
+        ],
+      };
+    }
     return filter;
   }
 }
