@@ -61,16 +61,19 @@ class LogForwardingPlugin {
     const principal = `logs.${service.provider.region}.amazonaws.com`;
     // Generate resources object for each function
     // Only one lambda permission is needed
-    const resourceObj = {
-      // LogForwardingLambdaPermission: {
-      //   Type: 'AWS::Lambda::Permission',
-      //   Properties: {
-      //     FunctionName: arn,
-      //     Action: 'lambda:InvokeFunction',
-      //     Principal: principal,
-      //   },
-      // },
-    };
+    const resourceObj = {};
+    if (!roleArn) {
+      _.extend(resourceObj, {
+        LogForwardingLambdaPermission: {
+          Type: 'AWS::Lambda::Permission',
+          Properties: {
+            FunctionName: arn,
+            Action: 'lambda:InvokeFunction',
+            Principal: principal,
+          },
+        },
+      });
+    }
     /* get list of all functions in this lambda
       and filter by those which explicitly declare logForwarding.enabled = false
     */
@@ -85,13 +88,10 @@ class LogForwardingPlugin {
           filterPattern,
           normalizedFilterID,
           roleArn,
+          dependsOn: (roleArn === '') ? ['LogForwardingLambdaPermission'] : [],
         });
         /* merge new SubscriptionFilter with current resources object */
-       // if (roleArn) {
-        //  _.extend(roleArn, subscriptionFilter);
-     //   } else {
         _.extend(resourceObj, subscriptionFilter);
-      //  }
       });
     return resourceObj;
   }
@@ -108,38 +108,23 @@ class LogForwardingPlugin {
   makeSubscriptionFilter(functionName, options) {
     const functionObject = this.serverless.service.getFunction(functionName);
     const logGroupName = this.provider.naming.getLogGroupName(functionObject.name);
-    const filterName = 'Destination';
-    // const filterName = options.normalizedFilterID ?
-    //   this.provider.naming.getNormalizedFunctionName(functionName)
-    //   : functionName;
+    const filterName = options.normalizedFilterID ?
+      this.provider.naming.getNormalizedFunctionName(functionName)
+      : functionName;
     const filterLogicalId = `SubscriptionFilter${filterName}`;
     const functionLogGroupId = this.provider.naming.getLogGroupLogicalId(functionName);
     const filter = {};
-    if (options.roleArn) {
-      filter[filterLogicalId] = {
-        Type: 'AWS::Logs::SubscriptionFilter',
-        Properties: {
-          RoleArn: options.roleArn,
-          DestinationArn: options.arn,
-          FilterPattern: options.filterPattern,
-          LogGroupName: logGroupName,
-        },
-      };
-    } else {
-      filter[filterLogicalId] = {
-        Type: 'AWS::Logs::SubscriptionFilter',
-        Properties: {
-          RoleArn: options.roleArn,
-          DestinationArn: options.arn,
-          FilterPattern: options.filterPattern,
-          LogGroupName: logGroupName,
-        },
-        DependsOn: [
-          'LogForwardingLambdaPermission',
-          functionLogGroupId,
-        ],
-      };
-    }
+    filter[filterLogicalId] = {
+      Type: 'AWS::Logs::SubscriptionFilter',
+      Properties: {
+        RoleArn: options.roleArn,
+        DestinationArn: options.arn,
+        FilterPattern: options.filterPattern,
+        LogGroupName: logGroupName,
+      },
+      DependsOn: _.union(options.dependsOn, [functionLogGroupId]),
+    };
+
     return filter;
   }
 }
