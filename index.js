@@ -54,7 +54,7 @@ class LogForwardingPlugin {
     }
     const filterPattern = service.custom.logForwarding.filterPattern || '';
     const normalizedFilterID = !(service.custom.logForwarding.normalizedFilterID === false);
-    const roleArn = service.custom.logForwarding.roleArn;
+    const roleArn = service.custom.logForwarding.roleArn || '';
     // Get options and parameters to make resources object
     const arn = service.custom.logForwarding.destinationARN;
     // Get list of all functions in this lambda
@@ -62,14 +62,14 @@ class LogForwardingPlugin {
     // Generate resources object for each function
     // Only one lambda permission is needed
     const resourceObj = {
-      LogForwardingLambdaPermission: {
-        Type: 'AWS::Lambda::Permission',
-        Properties: {
-          FunctionName: arn,
-          Action: 'lambda:InvokeFunction',
-          Principal: principal,
-        },
-      },
+      // LogForwardingLambdaPermission: {
+      //   Type: 'AWS::Lambda::Permission',
+      //   Properties: {
+      //     FunctionName: arn,
+      //     Action: 'lambda:InvokeFunction',
+      //     Principal: principal,
+      //   },
+      // },
     };
     /* get list of all functions in this lambda
       and filter by those which explicitly declare logForwarding.enabled = false
@@ -84,13 +84,14 @@ class LogForwardingPlugin {
           arn,
           filterPattern,
           normalizedFilterID,
+          roleArn,
         });
         /* merge new SubscriptionFilter with current resources object */
-        if (roleArn) {
-          _.extend(roleArn, subscriptionFilter);
-        } else {
-          _.extend(resourceObj, subscriptionFilter);
-        }
+       // if (roleArn) {
+        //  _.extend(roleArn, subscriptionFilter);
+     //   } else {
+        _.extend(resourceObj, subscriptionFilter);
+      //  }
       });
     return resourceObj;
   }
@@ -107,9 +108,10 @@ class LogForwardingPlugin {
   makeSubscriptionFilter(functionName, options) {
     const functionObject = this.serverless.service.getFunction(functionName);
     const logGroupName = this.provider.naming.getLogGroupName(functionObject.name);
-    const filterName = options.normalizedFilterID ?
-      this.provider.naming.getNormalizedFunctionName(functionName)
-      : functionName;
+    const filterName = 'Destination';
+    // const filterName = options.normalizedFilterID ?
+    //   this.provider.naming.getNormalizedFunctionName(functionName)
+    //   : functionName;
     const filterLogicalId = `SubscriptionFilter${filterName}`;
     const functionLogGroupId = this.provider.naming.getLogGroupLogicalId(functionName);
     const filter = {};
@@ -127,6 +129,7 @@ class LogForwardingPlugin {
       filter[filterLogicalId] = {
         Type: 'AWS::Logs::SubscriptionFilter',
         Properties: {
+          RoleArn: options.roleArn,
           DestinationArn: options.arn,
           FilterPattern: options.filterPattern,
           LogGroupName: logGroupName,

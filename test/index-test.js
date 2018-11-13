@@ -19,6 +19,11 @@ const correctConfigWithStageFilter = {
   filterPattern: 'Test Pattern',
   stages: ['production'],
 };
+const correctConfigWithRoleArn = {
+  destinationARN: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
+  roleArn: 'rolearn',
+  normalizedFilterID: false,
+};
 
 const Serverless = require('serverless');
 const AwsProvider = require('serverless/lib/plugins/aws/provider/awsProvider');
@@ -136,6 +141,7 @@ describe('Given a serverless config', () => {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
             FilterPattern: '',
             LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionOne',
+            RoleArn: '',
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
@@ -148,6 +154,7 @@ describe('Given a serverless config', () => {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
             FilterPattern: '',
             LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionTwo',
+            RoleArn: '',
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
@@ -180,6 +187,7 @@ describe('Given a serverless config', () => {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-dev-forward',
             FilterPattern: '',
             LogGroupName: '/aws/lambda/test-service-dev-testFunctionOne',
+            RoleArn: '',
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
@@ -192,6 +200,7 @@ describe('Given a serverless config', () => {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-dev-forward',
             FilterPattern: '',
             LogGroupName: '/aws/lambda/test-service-dev-testFunctionTwo',
+            RoleArn: '',
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
@@ -221,6 +230,7 @@ describe('Given a serverless config', () => {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
             FilterPattern: '',
             LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionOne',
+            RoleArn: '',
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
@@ -233,6 +243,7 @@ describe('Given a serverless config', () => {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
             FilterPattern: '',
             LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionTwo',
+            RoleArn: '',
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
@@ -265,6 +276,7 @@ describe('Given a serverless config', () => {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
             FilterPattern: 'Test Pattern',
             LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionOne',
+            RoleArn: '',
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
@@ -277,6 +289,7 @@ describe('Given a serverless config', () => {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
             FilterPattern: 'Test Pattern',
             LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionTwo',
+            RoleArn: '',
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
@@ -326,6 +339,7 @@ describe('Given a serverless config', () => {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
             FilterPattern: 'Test Pattern',
             LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionOne',
+            RoleArn: '',
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
@@ -338,6 +352,7 @@ describe('Given a serverless config', () => {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
             FilterPattern: 'Test Pattern',
             LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionTwo',
+            RoleArn: '',
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
@@ -350,6 +365,7 @@ describe('Given a serverless config', () => {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
             FilterPattern: 'Test Pattern',
             LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionThree',
+            RoleArn: '',
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
@@ -374,6 +390,37 @@ describe('Given a serverless config', () => {
     plugin.updateResources();
     expect(plugin.serverless.service.resources).to.eql(expectedResources);
   });
+});
+
+it('uses the roleArn property if set', () => {
+  const plugin = constructPluginResources(correctConfigWithRoleArn);
+  const expectedResources = {
+    Resources: {
+      TestExistingFilter: {
+        Type: 'AWS:Test:Filter',
+      },
+      SubscriptionFiltertestFunctionOne: {
+        Type: 'AWS::Logs::SubscriptionFilter',
+        Properties: {
+          DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
+          FilterPattern: '',
+          LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionOne',
+          RoleArn: 'rolearn',
+        },
+      },
+      SubscriptionFiltertestFunctionTwo: {
+        Type: 'AWS::Logs::SubscriptionFilter',
+        Properties: {
+          DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
+          FilterPattern: '',
+          LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionTwo',
+          RoleArn: 'rolearn',
+        },
+      },
+    },
+  };
+  plugin.updateResources();
+  expect(plugin.serverless.service.resources).to.eql(expectedResources);
 });
 
 describe('Catching errors in serverless config ', () => {
