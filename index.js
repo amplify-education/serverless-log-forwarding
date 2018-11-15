@@ -117,13 +117,15 @@ class LogForwardingPlugin {
     filter[filterLogicalId] = {
       Type: 'AWS::Logs::SubscriptionFilter',
       Properties: {
-        RoleArn: options.roleArn,
         DestinationArn: options.arn,
         FilterPattern: options.filterPattern,
         LogGroupName: logGroupName,
       },
       DependsOn: _.union(options.dependsOn, [functionLogGroupId]),
     };
+    if (!(options.roleArn === '')) {
+      filter[filterLogicalId].Properties.RoleArn = options.roleArn;
+    }
 
     return filter;
   }

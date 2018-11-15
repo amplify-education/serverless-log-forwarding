@@ -141,7 +141,6 @@ describe('Given a serverless config', () => {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
             FilterPattern: '',
             LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionOne',
-            RoleArn: '',
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
@@ -154,7 +153,6 @@ describe('Given a serverless config', () => {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
             FilterPattern: '',
             LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionTwo',
-            RoleArn: '',
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
@@ -187,7 +185,6 @@ describe('Given a serverless config', () => {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-dev-forward',
             FilterPattern: '',
             LogGroupName: '/aws/lambda/test-service-dev-testFunctionOne',
-            RoleArn: '',
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
@@ -200,7 +197,6 @@ describe('Given a serverless config', () => {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-dev-forward',
             FilterPattern: '',
             LogGroupName: '/aws/lambda/test-service-dev-testFunctionTwo',
-            RoleArn: '',
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
@@ -230,7 +226,6 @@ describe('Given a serverless config', () => {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
             FilterPattern: '',
             LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionOne',
-            RoleArn: '',
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
@@ -243,7 +238,6 @@ describe('Given a serverless config', () => {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
             FilterPattern: '',
             LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionTwo',
-            RoleArn: '',
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
@@ -276,7 +270,6 @@ describe('Given a serverless config', () => {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
             FilterPattern: 'Test Pattern',
             LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionOne',
-            RoleArn: '',
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
@@ -289,7 +282,6 @@ describe('Given a serverless config', () => {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
             FilterPattern: 'Test Pattern',
             LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionTwo',
-            RoleArn: '',
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
@@ -339,7 +331,6 @@ describe('Given a serverless config', () => {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
             FilterPattern: 'Test Pattern',
             LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionOne',
-            RoleArn: '',
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
@@ -352,7 +343,6 @@ describe('Given a serverless config', () => {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
             FilterPattern: 'Test Pattern',
             LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionTwo',
-            RoleArn: '',
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
@@ -365,7 +355,6 @@ describe('Given a serverless config', () => {
             DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
             FilterPattern: 'Test Pattern',
             LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionThree',
-            RoleArn: '',
           },
           DependsOn: [
             'LogForwardingLambdaPermission',
