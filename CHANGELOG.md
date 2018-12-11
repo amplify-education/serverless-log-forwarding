@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [1.2.1] - 2019-10-09
+## [1.3.0] - 2018-12-11
+
+### Added
+
+- Added support for a role arn parameter which allows for AWS Kinesis streams to be added as subscription filters.
+
+## [1.2.1] - 2018-10-09
 
 ### Changed
 
