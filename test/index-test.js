@@ -19,6 +19,11 @@ const correctConfigWithStageFilter = {
   filterPattern: 'Test Pattern',
   stages: ['production'],
 };
+const correctConfigWithRoleArn = {
+  destinationARN: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
+  roleArn: 'arn:aws:lambda:us-moon-1:314159265358:role/test-iam-role',
+  normalizedFilterID: false,
+};
 
 const Serverless = require('serverless');
 const AwsProvider = require('serverless/lib/plugins/aws/provider/awsProvider');
@@ -368,6 +373,43 @@ describe('Given a serverless config', () => {
       Resources: {
         TestExistingFilter: {
           Type: 'AWS:Test:Filter',
+        },
+      },
+    };
+    plugin.updateResources();
+    expect(plugin.serverless.service.resources).to.eql(expectedResources);
+  });
+
+  it('uses the roleArn property if set', () => {
+    const plugin = constructPluginResources(correctConfigWithRoleArn);
+    const expectedResources = {
+      Resources: {
+        TestExistingFilter: {
+          Type: 'AWS:Test:Filter',
+        },
+        SubscriptionFiltertestFunctionOne: {
+          Type: 'AWS::Logs::SubscriptionFilter',
+          Properties: {
+            DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
+            FilterPattern: '',
+            LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionOne',
+            RoleArn: 'arn:aws:lambda:us-moon-1:314159265358:role/test-iam-role',
+          },
+          DependsOn: [
+            'TestFunctionOneLogGroup',
+          ],
+        },
+        SubscriptionFiltertestFunctionTwo: {
+          Type: 'AWS::Logs::SubscriptionFilter',
+          Properties: {
+            DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
+            FilterPattern: '',
+            LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionTwo',
+            RoleArn: 'arn:aws:lambda:us-moon-1:314159265358:role/test-iam-role',
+          },
+          DependsOn: [
+            'TestFunctionTwoLogGroup',
+          ],
         },
       },
     };
