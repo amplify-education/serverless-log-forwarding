@@ -55,7 +55,8 @@ class LogForwardingPlugin {
     const filterPattern = service.custom.logForwarding.filterPattern || '';
     const normalizedFilterID = !(service.custom.logForwarding.normalizedFilterID === false);
     const roleArn = service.custom.logForwarding.roleArn || '';
-    const disablePermissionCreation = service.custom.logForwarding.disablePermissionCreation || false;
+    const disablePermissionCreation =
+      service.custom.logForwarding.disablePermissionCreation || false;
     // Get options and parameters to make resources object
     const arn = service.custom.logForwarding.destinationARN;
     // Get list of all functions in this lambda
