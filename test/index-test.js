@@ -24,6 +24,10 @@ const correctConfigWithRoleArn = {
   roleArn: 'arn:aws:lambda:us-moon-1:314159265358:role/test-iam-role',
   normalizedFilterID: false,
 };
+const correctConfigWithDisablePermissionCreation = {
+  destinationARN: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
+  disablePermissionCreation: true,
+};
 
 const Serverless = require('serverless');
 const AwsProvider = require('serverless/lib/plugins/aws/provider/awsProvider');
@@ -406,6 +410,38 @@ describe('Given a serverless config', () => {
             FilterPattern: '',
             LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionTwo',
             RoleArn: 'arn:aws:lambda:us-moon-1:314159265358:role/test-iam-role',
+          },
+          DependsOn: [
+            'TestFunctionTwoLogGroup',
+          ],
+        },
+      },
+    };
+    plugin.updateResources();
+    expect(plugin.serverless.service.resources).to.eql(expectedResources);
+  });
+
+  it('Skips creation of AWS::Lambda::Permission if configured so', () => {
+    const plugin = constructPluginNoResources(correctConfigWithDisablePermissionCreation);
+    const expectedResources = {
+      Resources: {
+        SubscriptionFilterTestFunctionOne: {
+          Type: 'AWS::Logs::SubscriptionFilter',
+          Properties: {
+            DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
+            FilterPattern: '',
+            LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionOne',
+          },
+          DependsOn: [
+            'TestFunctionOneLogGroup',
+          ],
+        },
+        SubscriptionFilterTestFunctionTwo: {
+          Type: 'AWS::Logs::SubscriptionFilter',
+          Properties: {
+            DestinationArn: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
+            FilterPattern: '',
+            LogGroupName: '/aws/lambda/test-service-test-stage-testFunctionTwo',
           },
           DependsOn: [
             'TestFunctionTwoLogGroup',
