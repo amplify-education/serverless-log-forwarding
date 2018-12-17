@@ -43,6 +43,7 @@ custom:
     roleArn: '[ARN of the IAM role that grants Cloudwatch Logs permissions]'
     filterPattern: '[filter pattern for logs that are sent to Lambda function]'
     normalizedFilterID: true # whether to use normalized function name as filter ID
+    disablePermissionCreation: false # whether to disable the creation of a AWS::Lambda::Permission resource to allow AWS to invoke your subscription lambda
     stages:
       - '[name of the stage to apply log forwarding]'
       - '[another stage name to filter]'

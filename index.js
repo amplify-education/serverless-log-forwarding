@@ -55,6 +55,7 @@ class LogForwardingPlugin {
     const filterPattern = service.custom.logForwarding.filterPattern || '';
     const normalizedFilterID = !(service.custom.logForwarding.normalizedFilterID === false);
     const roleArn = service.custom.logForwarding.roleArn || '';
+    const disablePermissionCreation = service.custom.logForwarding.disablePermissionCreation || false;
     // Get options and parameters to make resources object
     const arn = service.custom.logForwarding.destinationARN;
     // Get list of all functions in this lambda
@@ -62,7 +63,7 @@ class LogForwardingPlugin {
     // Generate resources object for each function
     // Only one lambda permission is needed
     const resourceObj = {};
-    if (!roleArn) {
+    if (!roleArn && !disablePermissionCreation) {
       _.extend(resourceObj, {
         LogForwardingLambdaPermission: {
           Type: 'AWS::Lambda::Permission',
@@ -88,7 +89,7 @@ class LogForwardingPlugin {
           filterPattern,
           normalizedFilterID,
           roleArn,
-          dependsOn: (roleArn === '') ? ['LogForwardingLambdaPermission'] : [],
+          dependsOn: (roleArn === '' && !disablePermissionCreation) ? ['LogForwardingLambdaPermission'] : [],
         });
         /* merge new SubscriptionFilter with current resources object */
         _.extend(resourceObj, subscriptionFilter);
