@@ -55,7 +55,7 @@ class LogForwardingPlugin {
     const filterPattern = service.custom.logForwarding.filterPattern || '';
     const normalizedFilterID = !(service.custom.logForwarding.normalizedFilterID === false);
     const roleArn = service.custom.logForwarding.roleArn || '';
-    const disabledLambdaPermission = service.custom.logForwarding.disabledLambdaPermission === true;
+    const createLambdaPermission = !(service.custom.logForwarding.createLambdaPermission === false);
     // Get options and parameters to make resources object
     const arn = service.custom.logForwarding.destinationARN;
     // Get list of all functions in this lambda
@@ -64,21 +64,23 @@ class LogForwardingPlugin {
     // Only one lambda permission is needed if it is not disabled
     const resourceObj = {};
     if (!roleArn) {
-        // The Lambda permission should only be disabled if this plugin is used in numerous (e.g. 70+) serverless projects
-        // that deploy to the same destinationARN within the same AWS account. There is a 20kb function policy limit that may
-        // be exceeded by the destination function policy in this case.
-        // If disabled, the user will be expected to create this lambda permission for the destination function by other means
-        if (!disabledLambdaPermission) {
-      _.extend(resourceObj, {
-        LogForwardingLambdaPermission: {
-          Type: 'AWS::Lambda::Permission',
-          Properties: {
-            FunctionName: arn,
-            Action: 'lambda:InvokeFunction',
-            Principal: principal,
+      // The Lambda permission should only be disabled if this plugin is used in numerous (e.g. 70+)
+      // serverless projects that deploy to the same destinationARN within the same AWS account.
+      // There is a 20kb function policy limit that may be exceeded by the destination function
+      // policy in this case. If disabled, the user will be expected to create this lambda
+      // permission for the destination function by other means
+      if (createLambdaPermission) {
+        _.extend(resourceObj, {
+          LogForwardingLambdaPermission: {
+            Type: 'AWS::Lambda::Permission',
+            Properties: {
+              FunctionName: arn,
+              Action: 'lambda:InvokeFunction',
+              Principal: principal,
+            },
           },
-        },
-      });
+        });
+      }
     }
     /* get list of all functions in this lambda
       and filter by those which explicitly declare logForwarding.enabled = false
@@ -94,7 +96,7 @@ class LogForwardingPlugin {
           filterPattern,
           normalizedFilterID,
           roleArn,
-          dependsOn: (roleArn === '' && ! disabledLambdaPermission) ? ['LogForwardingLambdaPermission'] : [],
+          dependsOn: (roleArn === '' && createLambdaPermission) ? ['LogForwardingLambdaPermission'] : [],
         });
         /* merge new SubscriptionFilter with current resources object */
         _.extend(resourceObj, subscriptionFilter);
@@ -109,7 +111,7 @@ class LogForwardingPlugin {
    *                          arn: arn of the lambda to forward to
    *                          filterPattern: filter pattern for the Subscription
    *                          normalizedFilterID: whether to use normalized FuncName as filter ID
-   *                          dependsOn: array of additional CloudFormation template resources the filter should depend on
+   *                          dependsOn: array of additional resources the filter should depend on
    * @return {Object}               SubscriptionFilter
    */
   makeSubscriptionFilter(functionName, options) {

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+
+## [1.4.0] - 2019-03-17
+
+### Added
+
+- Added support for disabling automatic creation of a AWS::Lambda::Permission. createLambdaPermission flag is enabled by default.
+
+
 ## [1.3.0] - 2018-12-11
 
 ### Added
