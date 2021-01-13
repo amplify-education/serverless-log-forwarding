@@ -1,9 +1,16 @@
 'use strict';
 
+import { AWSProvider, ServerlessInstance, ServerlessOptions } from "./types";
+
 const _ = require('underscore');
 
 class LogForwardingPlugin {
-  constructor(serverless, options) {
+  private serverless: ServerlessInstance;
+  private options: ServerlessOptions;
+  public provider: AWSProvider;
+  public hooks: object;
+
+  constructor (serverless, options) {
     this.serverless = serverless;
     this.options = options;
     this.provider = this.serverless.getProvider('aws');
@@ -17,7 +24,7 @@ class LogForwardingPlugin {
   /**
    * Updates CloudFormation resources with log forwarding
    */
-  updateResources() {
+  updateResources () {
     // check if stage is specified in config
     const service = this.serverless.service;
     const stage = this.options.stage && this.options.stage.length > 0
@@ -46,16 +53,16 @@ class LogForwardingPlugin {
    * Creates CloudFormation resources object with log forwarding
    * @return {Object} resources object
    */
-  createResourcesObj() {
+  createResourcesObj () {
     const service = this.serverless.service;
     // Checks if the serverless file is setup correctly
     if (service.custom.logForwarding.destinationARN == null) {
       throw new Error('Serverless-log-forwarding is not configured correctly. Please see README for proper setup.');
     }
     const filterPattern = service.custom.logForwarding.filterPattern || '';
-    const normalizedFilterID = !(service.custom.logForwarding.normalizedFilterID === false);
+    const normalizedFilterID = service.custom.logForwarding.normalizedFilterID !== false;
     const roleArn = service.custom.logForwarding.roleArn || '';
-    const createLambdaPermission = !(service.custom.logForwarding.createLambdaPermission === false);
+    const createLambdaPermission = service.custom.logForwarding.createLambdaPermission !== false;
     // Get options and parameters to make resources object
     const arn = service.custom.logForwarding.destinationARN;
     // Get list of all functions in this lambda
@@ -114,7 +121,7 @@ class LogForwardingPlugin {
    *                          dependsOn: array of additional resources the filter should depend on
    * @return {Object}               SubscriptionFilter
    */
-  makeSubscriptionFilter(functionName, options) {
+  makeSubscriptionFilter (functionName, options) {
     const functionObject = this.serverless.service.getFunction(functionName);
     const logGroupName = this.provider.naming.getLogGroupName(functionObject.name);
     const filterName = options.normalizedFilterID ?
@@ -132,7 +139,7 @@ class LogForwardingPlugin {
       },
       DependsOn: _.union(options.dependsOn, [functionLogGroupId]),
     };
-    if (!(options.roleArn === '')) {
+    if (options.roleArn !== '') {
       filter[filterLogicalId].Properties.RoleArn = options.roleArn;
     }
 

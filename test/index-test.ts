@@ -1,7 +1,5 @@
-const chai = require('chai');
-const LogForwardingPlugin = require('../index.js');
-
-const expect = chai.expect;
+import { expect } from "chai";
+const LogForwardingPlugin = require('../src/index.ts');
 
 const correctConfig = {
   destinationARN: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
@@ -41,7 +39,7 @@ const correctConfigWithDisabledLambdaPermissionAndRoleArn = {
 
 
 const Serverless = require('serverless');
-const AwsProvider = require('serverless/lib/plugins/aws/provider/awsProvider');
+const AwsProvider = require('serverless/lib/plugins/aws/provider');
 
 const createServerless = (options, service) => {
   const serverless = new Serverless(options);
@@ -55,7 +53,7 @@ const createServerless = (options, service) => {
   return serverless;
 };
 
-const constructPluginResources = (logForwarding, functions) => {
+const constructPluginResources = (logForwarding, functions?) => {
   const options = {};
   const serverless = createServerless(options, {
     provider: {
