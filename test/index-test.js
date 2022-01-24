@@ -41,7 +41,7 @@ const correctConfigWithDisabledLambdaPermissionAndRoleArn = {
 
 
 const Serverless = require('serverless');
-const AwsProvider = require('serverless/lib/plugins/aws/provider/awsProvider');
+const AwsProvider = require('serverless/lib/plugins/aws/provider');
 
 const createServerless = (options, service) => {
   const serverless = new Serverless(options);
