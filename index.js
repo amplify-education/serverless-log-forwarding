@@ -19,12 +19,12 @@ class LogForwardingPlugin {
    */
   updateResources() {
     // check if stage is specified in config
-    const service = this.serverless.service;
+    const { service } = this.serverless;
     const stage = this.options.stage && this.options.stage.length > 0
       ? this.options.stage
       : service.provider.stage;
-    if (service.custom.logForwarding.stages &&
-      service.custom.logForwarding.stages.indexOf(stage) === -1) {
+    if (service.custom.logForwarding.stages
+      && service.custom.logForwarding.stages.indexOf(stage) === -1) {
       this.serverless.cli.log(`Log Forwarding is ignored for ${stage} stage`);
       return;
     }
@@ -47,7 +47,7 @@ class LogForwardingPlugin {
    * @return {Object} resources object
    */
   createResourcesObj() {
-    const service = this.serverless.service;
+    const { service } = this.serverless;
     // Checks if the serverless file is setup correctly
     if (service.custom.logForwarding.destinationARN == null) {
       throw new Error('Serverless-log-forwarding is not configured correctly. Please see README for proper setup.');
@@ -117,8 +117,8 @@ class LogForwardingPlugin {
   makeSubscriptionFilter(functionName, options) {
     const functionObject = this.serverless.service.getFunction(functionName);
     const logGroupName = this.provider.naming.getLogGroupName(functionObject.name);
-    const filterName = options.normalizedFilterID ?
-      this.provider.naming.getNormalizedFunctionName(functionName)
+    const filterName = options.normalizedFilterID
+      ? this.provider.naming.getNormalizedFunctionName(functionName)
       : functionName;
     const filterLogicalId = `SubscriptionFilter${filterName}`;
     const functionLogGroupId = this.provider.naming.getLogGroupLogicalId(functionName);
