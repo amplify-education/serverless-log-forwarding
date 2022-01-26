@@ -11,14 +11,14 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "eslint": "^3.18.0",
-    "eslint-config-airbnb": "^14.1.0",
+    "eslint": "^8.7.0",
+    "eslint-config-airbnb": "^19.0.4",
     "eslint-plugin-import": "^2.7.0",
-    "eslint-plugin-jsx-a11y": "^3.0.2",
-    "eslint-plugin-react": "^6.10.3",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "eslint-plugin-react": "^7.28.0",
     "istanbul": "^0.4.5",
-    "mocha": "^5.2.0",
-    "serverless": "^1.32.0"
+    "mocha": "^9.1.4",
+    "serverless": "^2.72.1"
   },
   "scripts": {
     "test": "node ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- -R spec && node ./node_modules/istanbul/lib/cli.js check-coverage --line 70 coverage/coverage.json",
