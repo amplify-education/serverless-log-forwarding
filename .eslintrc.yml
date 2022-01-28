@@ -3,12 +3,11 @@ extends:
 rules:
     strict: off
     no-console: off
-    no-unused-vars: off
-    no-await-in-loop: off
     no-restricted-syntax: off
+    no-await-in-loop: off
     no-promise-executor-return: off
 ignorePatterns:
-    - tests/integration-tests/configs/**
+    - test/integration-tests/configs/**
     - test/integration-tests/resources/**
 env:
     mocha: true

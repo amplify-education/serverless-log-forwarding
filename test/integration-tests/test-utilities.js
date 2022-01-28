@@ -1,10 +1,15 @@
 'use strict';
 
+const fs = require('fs');
 const aws = require('aws-sdk');
 const shell = require('shelljs');
 const base = require('./base');
 
 aws.config.update({ region: 'us-west-2' });
+const lambda = new aws.Lambda({ apiVersion: '2015-03-31' });
+
+const RESOURCE_FOLDER = 'resources';
+const CONFIGS_FOLDER = 'configs';
 
 /**
  * Executes given shell command.
@@ -107,14 +112,87 @@ async function getSubscriptionFilters(logGroupName) {
   return resp.subscriptionFilters;
 }
 
+async function createDummyFunction(functionName) {
+  const resp = await lambda.createFunction({
+    Code: {
+      ZipFile: fs.readFileSync(`test/integration-tests/${RESOURCE_FOLDER}/logs-receiver.zip`),
+    },
+    Architectures: ['x86_64'],
+    Handler: 'index.handler',
+    FunctionName: functionName,
+    Role: 'arn:aws:iam::646102706174:role/lambda_basic_execution',
+    Runtime: 'nodejs14.x',
+  }).promise();
+  return resp.FunctionArn;
+}
+
+async function deleteFunction(functionName) {
+  await lambda.deleteFunction({ FunctionName: functionName }).promise();
+}
+
+async function ensureFunctionCreated(functionName) {
+  const maxRetries = 10;
+  const delayMs = 500;
+  for (let retry = 1; retry <= maxRetries; retry += 1) {
+    const resp = await lambda.getFunction({ FunctionName: functionName }).promise();
+    if (resp.Configuration.State === 'Active') {
+      return;
+    }
+    await new Promise((r) => setTimeout(r, delayMs));
+  }
+  throw Error('Function initializing timeout.');
+}
+
+async function pingFunction(functionName) {
+  await lambda.invoke({
+    FunctionName: functionName,
+    Payload: Buffer.from('{}'),
+  }).promise();
+}
+
+async function getFunctionPolicy(functionName) {
+  try {
+    const resp = await lambda.getPolicy({ FunctionName: functionName }).promise();
+    return JSON.parse(resp.Policy);
+  } catch (e) {
+    if (e.name === 'ResourceNotFoundException') {
+      return null;
+    }
+    throw e;
+  }
+}
+
+async function createCustomPolicy(functionArn) {
+  const statemenentId = `invokeLambdaStatement${base.RANDOM_STRING}`;
+  await lambda.addPermission({
+    Action: 'lambda:InvokeFunction',
+    FunctionName: functionArn,
+    Principal: 'logs.us-west-2.amazonaws.com',
+    StatementId: statemenentId,
+  }).promise();
+  console.debug('\tCustom policy was created');
+  return statemenentId;
+}
+
+async function* resourceContext(testName) {
+  const configFolder = `${CONFIGS_FOLDER}/${testName}`;
+  await createResources(configFolder, testName);
+  try {
+    yield;
+  } finally {
+    await destroyResources(testName);
+  }
+}
+
 module.exports = {
-  createResources,
-  createTempDir,
-  destroyResources,
-  exec,
-  slsDeploy,
-  slsRemove,
   getFunctionName,
   getFunctionLogGroup,
   getSubscriptionFilters,
+  createDummyFunction,
+  ensureFunctionCreated,
+  pingFunction,
+  deleteFunction,
+  getFunctionPolicy,
+  createCustomPolicy,
+  resourceContext,
 };
