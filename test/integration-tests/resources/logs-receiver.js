@@ -1,1 +1,1 @@
-exports.handler = function (_, __) { return }
+exports.handler = function (_, __) { };

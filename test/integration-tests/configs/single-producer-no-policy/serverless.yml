@@ -1,4 +1,4 @@
-service: ${env:PLUGIN_IDENTIFIER}-single-producer-filter-pattern-${env:RANDOM_STRING}
+service: ${env:PLUGIN_IDENTIFIER}-single-producer-no-policy-${env:RANDOM_STRING}
 
 provider:
   lambdaHashingVersion: 20201221
@@ -22,4 +22,4 @@ plugins:
 custom:
   logForwarding:
     destinationARN: ${env:LOGS_RECEIVER_ARN}
-    filterPattern: "helloWorld"
+    roleArn: arn:aws:iam::${aws:accountId}:role/LogForwardingRole${env:RANDOM_STRING}

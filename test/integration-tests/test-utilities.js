@@ -1,11 +1,10 @@
-"use strict";
+'use strict';
 
-const aws = require("aws-sdk");
-const shell = require("shelljs");
-const base = require("./base")
+const aws = require('aws-sdk');
+const shell = require('shelljs');
+const base = require('./base');
 
-const AWS_PROFILE = process.env.AWS_PROFILE;
-aws.config.update({region:'us-west-2'});
+aws.config.update({ region: 'us-west-2' });
 
 /**
  * Executes given shell command.
@@ -15,7 +14,7 @@ aws.config.update({region:'us-west-2'});
 async function exec(cmd) {
   console.debug(`\tRunning command: ${cmd}`);
   return new Promise((resolve, reject) => {
-    shell.exec(cmd, {silent: false}, (err, stdout, stderr) => {
+    shell.exec(cmd, { silent: false }, (err, stdout, stderr) => {
       const error = err || stderr;
       if (error) {
         return reject(error);
@@ -66,14 +65,13 @@ function slsRemove(tempDir) {
  * @returns {Promise<void>} Resolves if successfully executed, else rejects
  */
 async function createResources(folderName, url) {
-  console.log("\techo 123");
   console.debug(`\tCreating Resources for ${url} \tUsing tmp directory ${base.TEMP_DIR}`);
   try {
     await createTempDir(base.TEMP_DIR, folderName);
     await slsDeploy(base.TEMP_DIR);
-    console.debug("\tResources Created");
+    console.debug('\tResources Created');
   } catch (e) {
-    console.debug("\tResources Failed to Create");
+    console.debug('\tResources Failed to Create');
   }
 }
 
@@ -87,9 +85,9 @@ async function destroyResources(url) {
     console.debug(`\tCleaning Up Resources for ${url}`);
     await slsRemove(base.TEMP_DIR);
     await exec(`rm -rf ${base.TEMP_DIR}`);
-    console.debug("\tResources Cleaned Up");
+    console.debug('\tResources Cleaned Up');
   } catch (e) {
-    console.debug("\tFailed to Clean Up Resources");
+    console.debug('\tFailed to Clean Up Resources');
     console.debug(e);
     throw e;
   }
@@ -105,7 +103,7 @@ function getFunctionName(testName, stage, functionIdentifier) {
 
 async function getSubscriptionFilters(logGroupName) {
   const logs = new aws.CloudWatchLogs();
-  const resp = await logs.describeSubscriptionFilters({logGroupName}).promise();
+  const resp = await logs.describeSubscriptionFilters({ logGroupName }).promise();
   return resp.subscriptionFilters;
 }
 
@@ -118,5 +116,5 @@ module.exports = {
   slsRemove,
   getFunctionName,
   getFunctionLogGroup,
-  getSubscriptionFilters
+  getSubscriptionFilters,
 };
