@@ -106,7 +106,7 @@ describe('Integration Tests', function () {
 
   describe('With custom lambda permission', async () => {
     beforeEach(async () => {
-      this.statementId = await this.createCustomPolicy(this.logsReceiverArn);
+      this.statementId = await utilities.createCustomPolicy(this.logsReceiverArn);
     });
 
     it('Single producer custom lambda permission', async () => {
