@@ -1,4 +1,4 @@
-service: ${env:PLUGIN_IDENTIFIER}-single-stage-pass-${env:RANDOM_STRING}
+service: ${env:PLUGIN_IDENTIFIER}-create-perm-off-${env:RANDOM_STRING}
 
 provider:
   lambdaHashingVersion: 20201221
@@ -21,7 +21,4 @@ plugins:
 custom:
   logForwarding:
     destinationARN: ${env:LOGS_RECEIVER_ARN}
-    stages:
-      - dev
-      - test
-      - ci
+    createLambdaPermission: false

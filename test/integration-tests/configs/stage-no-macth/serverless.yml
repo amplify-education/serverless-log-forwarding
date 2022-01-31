@@ -1,4 +1,4 @@
-service: ${env:PLUGIN_IDENTIFIER}-single-stage-fail-${env:RANDOM_STRING}
+service: ${env:PLUGIN_IDENTIFIER}-stage-no-macth-${env:RANDOM_STRING}
 
 provider:
   lambdaHashingVersion: 20201221
