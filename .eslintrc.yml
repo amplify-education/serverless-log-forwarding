@@ -2,5 +2,12 @@ extends:
     - airbnb
 rules:
     strict: off
+    no-console: off
+    no-restricted-syntax: off
+    no-await-in-loop: off
+    no-promise-executor-return: off
+ignorePatterns:
+    - test/integration-tests/configs/**
+    - test/integration-tests/resources/**
 env:
     mocha: true

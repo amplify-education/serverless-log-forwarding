@@ -1,7 +1,7 @@
 const chai = require('chai');
 const Serverless = require('serverless');
 const AwsProvider = require('serverless/lib/plugins/aws/provider');
-const LogForwardingPlugin = require('../index');
+const LogForwardingPlugin = require('../../index');
 
 const { expect } = chai;
 

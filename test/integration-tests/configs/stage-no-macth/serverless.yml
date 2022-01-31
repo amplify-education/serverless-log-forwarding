@@ -1,0 +1,27 @@
+service: ${env:PLUGIN_IDENTIFIER}-stage-no-macth-${env:RANDOM_STRING}
+
+provider:
+  lambdaHashingVersion: 20201221
+  name: aws
+  runtime: python3.8
+  region: us-west-2
+  stage: test
+
+package:
+  exclude:
+    - 'node_modules/**'
+
+functions:
+  logs-producer:
+    handler: logs_producer.handler
+
+plugins:
+  - serverless-log-forwarding
+
+custom:
+  logForwarding:
+    destinationARN: ${env:LOGS_RECEIVER_ARN}
+    stages:
+      - test1
+      - dev
+      - ci
