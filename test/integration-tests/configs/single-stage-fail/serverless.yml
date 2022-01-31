@@ -1,4 +1,4 @@
-service: ${env:PLUGIN_IDENTIFIER}-single-producer-stage-filter-fail-${env:RANDOM_STRING}
+service: ${env:PLUGIN_IDENTIFIER}-single-stage-fail-${env:RANDOM_STRING}
 
 provider:
   lambdaHashingVersion: 20201221
@@ -6,7 +6,6 @@ provider:
   runtime: python3.8
   region: us-west-2
   stage: test
-  role: arn:aws:iam::646102706174:role/envoy_admin_ui_role
 
 package:
   exclude:

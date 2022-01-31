@@ -1,4 +1,4 @@
-service: ${env:PLUGIN_IDENTIFIER}-single-producer-filter-pattern-${env:RANDOM_STRING}
+service: ${env:PLUGIN_IDENTIFIER}-multiple-one-disabled-${env:RANDOM_STRING}
 
 provider:
   lambdaHashingVersion: 20201221
@@ -6,15 +6,18 @@ provider:
   runtime: python3.8
   region: us-west-2
   stage: test
-  role: arn:aws:iam::646102706174:role/envoy_admin_ui_role
 
 package:
   exclude:
     - 'node_modules/**'
 
 functions:
-  logs-producer:
+  logs-producer-1:
     handler: logs_producer.handler
+  logs-producer-2:
+    handler: logs_producer.handler
+    logForwarding:
+      enabled: false
 
 plugins:
   - serverless-log-forwarding
@@ -22,4 +25,3 @@ plugins:
 custom:
   logForwarding:
     destinationARN: ${env:LOGS_RECEIVER_ARN}
-    filterPattern: "helloWorld"

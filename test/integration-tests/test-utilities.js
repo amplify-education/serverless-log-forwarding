@@ -9,7 +9,6 @@ aws.config.update({ region: 'us-west-2' });
 const lambda = new aws.Lambda({ apiVersion: '2015-03-31' });
 
 const RESOURCE_FOLDER = 'resources';
-const CONFIGS_FOLDER = 'configs';
 
 /**
  * Executes given shell command.
@@ -112,6 +111,11 @@ async function getSubscriptionFilters(logGroupName) {
   return resp.subscriptionFilters;
 }
 
+async function getSubscriptionFilter(logGroupName, destinationArn) {
+  const subscripionFilters = await getSubscriptionFilters(logGroupName);
+  return subscripionFilters.find((s) => s.destinationArn === destinationArn);
+}
+
 async function createDummyFunction(functionName) {
   const resp = await lambda.createFunction({
     Code: {
@@ -143,13 +147,6 @@ async function ensureFunctionCreated(functionName) {
   throw Error('Function initializing timeout.');
 }
 
-async function pingFunction(functionName) {
-  await lambda.invoke({
-    FunctionName: functionName,
-    Payload: Buffer.from('{}'),
-  }).promise();
-}
-
 async function getFunctionPolicy(functionName) {
   try {
     const resp = await lambda.getPolicy({ FunctionName: functionName }).promise();
@@ -174,25 +171,15 @@ async function createCustomPolicy(functionArn) {
   return statemenentId;
 }
 
-async function* resourceContext(testName) {
-  const configFolder = `${CONFIGS_FOLDER}/${testName}`;
-  await createResources(configFolder, testName);
-  try {
-    yield;
-  } finally {
-    await destroyResources(testName);
-  }
-}
-
 module.exports = {
+  createResources,
+  destroyResources,
   getFunctionName,
   getFunctionLogGroup,
-  getSubscriptionFilters,
   createDummyFunction,
   ensureFunctionCreated,
-  pingFunction,
   deleteFunction,
   getFunctionPolicy,
   createCustomPolicy,
-  resourceContext,
+  getSubscriptionFilter,
 };
