@@ -85,7 +85,7 @@ describe('Integration Tests', function () {
   });
 
   it('Single producer stage filter pass', async () => {
-    const testName = 'single-stage-pass';
+    const testName = 'stage-match';
     const logsProducerName = utilities.getFunctionName(testName, 'test', 'logs-producer');
     const producerLogGroup = utilities.getFunctionLogGroup(logsProducerName);
     await runTest(testName, async () => {
@@ -96,7 +96,7 @@ describe('Integration Tests', function () {
   });
 
   it('Single producer stage filter fail', async () => {
-    const testName = 'single-stage-fail';
+    const testName = 'stage-no-match';
     const logsProducerName = utilities.getFunctionName(testName, 'test', 'logs-producer');
     const producerLogGroup = utilities.getFunctionLogGroup(logsProducerName);
     await runTest(testName, async () => {
@@ -121,7 +121,7 @@ describe('Integration Tests', function () {
     beforeEach(async () => { await setUpLambdaCustomPolicy(this); });
 
     it('Single producer custom lambda permission', async () => {
-      const testName = 'single-permission';
+      const testName = 'create-perm-off';
       const logsProducerName = utilities.getFunctionName(testName, 'test', 'logs-producer');
       const producerLogGroup = utilities.getFunctionLogGroup(logsProducerName);
       await runTest(testName, async () => {
