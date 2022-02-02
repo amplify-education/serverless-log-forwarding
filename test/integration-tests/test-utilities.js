@@ -19,9 +19,8 @@ async function exec(cmd) {
   console.debug(`\tRunning command: ${cmd}`);
   return new Promise((resolve, reject) => {
     shell.exec(cmd, { silent: false }, (err, stdout, stderr) => {
-      const error = err || stderr;
-      if (error) {
-        return reject(error);
+      if (err) {
+        return reject(stderr);
       }
       return resolve(stdout);
     });
@@ -92,8 +91,6 @@ async function destroyResources(url) {
     console.debug('\tResources Cleaned Up');
   } catch (e) {
     console.debug('\tFailed to Clean Up Resources');
-    console.debug(e);
-    throw e;
   }
 }
 

@@ -1,15 +1,14 @@
 service: ${env:PLUGIN_IDENTIFIER}-stage-match-${env:RANDOM_STRING}
 
 provider:
-  lambdaHashingVersion: 20201221
   name: aws
   runtime: python3.8
   region: us-west-2
   stage: test
 
 package:
-  exclude:
-    - 'node_modules/**'
+  patterns:
+    - '!node_modules/**'
 
 functions:
   logs-producer:

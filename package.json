@@ -1,6 +1,6 @@
 {
   "name": "serverless-log-forwarding",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "a serverless plugin to forward logs to given lambda function",
   "main": "index.js",
   "directories": {
@@ -10,6 +10,7 @@
     "underscore": "^1.8.3"
   },
   "devDependencies": {
+    "aws-sdk": "^2.1061.0",
     "chai": "^3.5.0",
     "eslint": "^8.7.0",
     "eslint-config-airbnb": "^19.0.4",
@@ -18,9 +19,8 @@
     "eslint-plugin-react": "^7.28.0",
     "istanbul": "^0.4.5",
     "mocha": "^9.1.4",
-    "serverless": "^2.72.1",
-    "aws-sdk": "^2.1061.0",
     "randomstring": "^1.2.2",
+    "serverless": "^3.1.0",
     "shelljs": "^0.8.5"
   },
   "scripts": {
