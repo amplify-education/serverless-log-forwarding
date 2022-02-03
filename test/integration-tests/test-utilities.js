@@ -18,12 +18,11 @@ const RESOURCE_FOLDER = 'resources';
 async function exec(cmd) {
   console.debug(`\tRunning command: ${cmd}`);
   return new Promise((resolve, reject) => {
-    shell.exec(cmd, { silent: false }, (err, stdout, stderr) => {
-      const error = err || stderr;
-      if (error) {
-        return reject(error);
+    shell.exec(cmd, { silent: false }, (errorCode, stdout, stderr) => {
+      if (errorCode === 0) {
+        return resolve(stdout);
       }
-      return resolve(stdout);
+      return reject(stderr);
     });
   });
 }
@@ -92,8 +91,6 @@ async function destroyResources(url) {
     console.debug('\tResources Cleaned Up');
   } catch (e) {
     console.debug('\tFailed to Clean Up Resources');
-    console.debug(e);
-    throw e;
   }
 }
 

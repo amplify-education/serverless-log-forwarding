@@ -41,21 +41,24 @@ const correctConfigWithDisabledLambdaPermissionAndRoleArn = {
   createLambdaPermission: false,
 };
 
-const createServerless = (options, service) => {
-  const serverless = new Serverless(options);
+const createServerless = (config, service) => {
+  const serverless = new Serverless(config);
   serverless.cli = {
     log() {
     },
   };
-  new AwsProvider(serverless, options); // eslint-disable-line no-new
+  new AwsProvider(serverless, config); // eslint-disable-line no-new
   serverless.service.update(service);
-  serverless.service.setFunctionNames(options);
+  serverless.service.setFunctionNames(config);
   return serverless;
 };
 
 const constructPluginResources = (logForwarding, functions) => {
-  const options = {};
-  const serverless = createServerless(options, {
+  const config = {
+    commands: [],
+    options: {},
+  };
+  const serverless = createServerless(config, {
     provider: {
       region: 'us-moon-1',
       stage: 'test-stage',
@@ -79,11 +82,14 @@ const constructPluginResources = (logForwarding, functions) => {
     },
     service: 'test-service',
   });
-  return new LogForwardingPlugin(serverless, options);
+  return new LogForwardingPlugin(serverless, config);
 };
 const constructPluginNoResources = (logForwarding) => {
-  const options = {};
-  const serverless = createServerless(options, {
+  const config = {
+    commands: [],
+    options: {},
+  };
+  const serverless = createServerless(config, {
     provider: {
       region: 'us-moon-1',
       stage: 'test-stage',
@@ -100,11 +106,15 @@ const constructPluginNoResources = (logForwarding) => {
     service: 'test-service',
   });
   serverless.service.resources = undefined;
-  return new LogForwardingPlugin(serverless, options);
+  return new LogForwardingPlugin(serverless, config);
 };
 
 const constructPluginResourcesWithParam = (logForwarding) => {
-  const options = { stage: 'dev' };
+  const options = {
+    commands: [],
+    options: {},
+    stage: 'dev',
+  };
   const serverless = createServerless(options, {
     provider: {
       region: 'us-moon-1',
