@@ -3,7 +3,7 @@
 import * as _ from "underscore"
 import { AWSProvider, ServerlessInstance, ServerlessConfig } from "./types";
 
-export class LogForwardingPlugin {
+class LogForwardingPlugin {
   options: ServerlessConfig
   provider: AWSProvider
   serverless: ServerlessInstance
@@ -145,3 +145,5 @@ export class LogForwardingPlugin {
     return filter;
   }
 }
+
+export = LogForwardingPlugin;

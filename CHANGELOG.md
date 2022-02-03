@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [2.0.0] - 2022-02-03
+
+### Added
+
+- Moved the plugin and unit tests to TypeScript.
+- Moved from istanbul to nyc.
+
 ## [1.5.0] - 2022-02-03
 
 ### Added
