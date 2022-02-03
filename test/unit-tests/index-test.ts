@@ -1,8 +1,9 @@
 import {expect} from 'chai';
 import * as Serverless from 'serverless';
 import * as AwsProvider from 'serverless/lib/plugins/aws/provider';
-import {LogForwardingPlugin} from '../../src/index';
 import {ServerlessConfig} from '../../src/types';
+
+const LogForwardingPlugin = require('../../src/index');
 
 const correctConfig = {
   destinationARN: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
