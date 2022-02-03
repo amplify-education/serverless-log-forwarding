@@ -18,11 +18,11 @@ const RESOURCE_FOLDER = 'resources';
 async function exec(cmd) {
   console.debug(`\tRunning command: ${cmd}`);
   return new Promise((resolve, reject) => {
-    shell.exec(cmd, { silent: false }, (err, stdout, stderr) => {
-      if (err) {
-        return reject(stderr);
+    shell.exec(cmd, { silent: false }, (errorCode, stdout, stderr) => {
+      if (errorCode == 0) {
+        return resolve(stdout);
       }
-      return resolve(stdout);
+      return reject(stderr);
     });
   });
 }
