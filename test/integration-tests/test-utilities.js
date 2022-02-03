@@ -19,7 +19,7 @@ async function exec(cmd) {
   console.debug(`\tRunning command: ${cmd}`);
   return new Promise((resolve, reject) => {
     shell.exec(cmd, { silent: false }, (errorCode, stdout, stderr) => {
-      if (errorCode == 0) {
+      if (errorCode === 0) {
         return resolve(stdout);
       }
       return reject(stderr);
