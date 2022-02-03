@@ -1,9 +1,15 @@
 'use strict';
 
-const _ = require('underscore');
+import * as _ from "underscore"
+import { AWSProvider, ServerlessInstance, ServerlessConfig } from "./types";
 
-class LogForwardingPlugin {
-  constructor(serverless, options) {
+export class LogForwardingPlugin {
+  options: ServerlessConfig
+  provider: AWSProvider
+  serverless: ServerlessInstance
+  hooks: any
+
+  constructor(serverless: ServerlessInstance, options: ServerlessConfig) {
     this.serverless = serverless;
     this.options = options;
     this.provider = this.serverless.getProvider('aws');
@@ -139,5 +145,3 @@ class LogForwardingPlugin {
     return filter;
   }
 }
-
-module.exports = LogForwardingPlugin;
