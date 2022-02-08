@@ -107,7 +107,7 @@ class LogForwardingPlugin {
     return `SubscriptionFilter${filterName}`;
   }
 
-  getStage() {
+  getStage(): string {
     const { stage } = this.options;
     if (stage && stage !== '') {
       return stage;
