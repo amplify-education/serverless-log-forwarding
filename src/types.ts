@@ -1,51 +1,84 @@
+export interface SlsFunction {
+  name: string;
+  logForwarding?: {
+    enabled?: boolean;
+  }
+}
+
+export interface PluginConfig {
+  stages?: string[];
+  roleArn?: string;
+  filterPattern: string;
+  normalizedFilterID: boolean;
+  createLambdaPermission: boolean;
+  destinationARN: string;
+}
+
 export interface ServerlessInstance {
   service: {
     service: string
     resources: {
-      Resources: Record<string, unknown>
+      Resources: ResourcesCF
     },
     provider: {
       stage: string,
       region: string
     },
     functions: {
-      name: object
+      name: unknown[];
     },
-    getFunction (name: string),
+    getFunction (name: string): SlsFunction,
     custom: {
-      logForwarding: {
-        stages: string[] | undefined,
-        destinationARN: string,
-        filterPattern: string,
-        normalizedFilterID: boolean,
-        createLambdaPermission: boolean,
-        roleArn: string
-      }
+      logForwarding: PluginConfig
     },
   },
   providers: {
     aws: {
-      getCredentials (),
-      getRegion (),
+      getRegion (): string,
     },
   },
-  getProvider (name),
+  getProvider (name: string): AWSProvider,
   cli: {
-    log (str: string, entity?: string),
-    consoleLog (str: string),
+    log (str: string, entity?: string): void,
+    consoleLog (str: string): void,
   }
 }
 
 export interface ServerlessConfig {
   commands: string[];
-  options: object;
+  options: Record<string, unknown>;
   stage: string | null;
 }
 
 export interface AWSProvider {
   naming: {
-    getLogGroupName(name),
-    getNormalizedFunctionName(name),
-    getLogGroupLogicalId(name)
+    getLogGroupName(name: string): string,
+    getNormalizedFunctionName(name: string): string,
+    getLogGroupLogicalId(name: string): string
   }
 }
+
+export interface ObjectCF<TProps> {
+  Type: string;
+  DependsOn?: string[];
+  Properties: TProps;
+}
+
+export type ResourcesCF = Record<string, ObjectCF<unknown>>;
+
+export interface LambdaPermissionProps {
+  Action: string;
+  Principal: string;
+  FunctionName: string;
+}
+
+export interface SubscriptionFilterProps {
+  DestinationArn: string;
+  FilterPattern: string;
+  LogGroupName: string;
+  RoleArn?: string;
+}
+
+export type LambdaPermissionCF = ObjectCF<LambdaPermissionProps>;
+
+export type SubscriptionFilterCF = ObjectCF<SubscriptionFilterProps>;

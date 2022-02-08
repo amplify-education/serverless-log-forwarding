@@ -1,49 +1,22 @@
 import * as _ from 'underscore';
-import { AWSProvider, ServerlessInstance, ServerlessConfig } from './types';
+import type {
+  AWSProvider,
+  ServerlessInstance,
+  ServerlessConfig,
+  PluginConfig,
+  ResourcesCF,
+  SubscriptionFilterCF,
+  LambdaPermissionCF,
+} from './types';
 
-interface PluginConfig {
-  stages?: string[];
-  roleArn?: string;
-  filterPattern: string;
-  normalizedFilterID: boolean;
-  createLambdaPermission: boolean;
-  destinationARN: string;
-}
-
-const configDefaults = {
+const CONFIG_DEFAULTS = {
   filterPattern: '',
   normalizedFilterID: true,
   createLambdaPermission: true,
 };
 
-interface CFObject<TProps> {
-  Type: string;
-  DependsOn?: string[];
-  Properties: TProps;
-}
-
-interface LambdaPermissionProps {
-  Action: string;
-  Principal: string;
-  FunctionName: string;
-}
-
-interface SubscriptionFilterProps {
-  DestinationArn: string;
-  FilterPattern: string;
-  LogGroupName: string;
-  RoleArn?: string;
-}
-
-type LambdaPermission = CFObject<LambdaPermissionProps>;
-type SubscriptionFilter = CFObject<SubscriptionFilterProps>;
-
-function getStage(options: ServerlessConfig, sls: ServerlessInstance) {
-  if (options.stage && options.stage !== '') {
-    return options.stage;
-  }
-  return sls.service.provider.stage;
-}
+// The key of a lambda permission in CloudFormation resources
+const PERMISSION_ID = 'LogForwardingLambdaPermission';
 
 class LogForwardingPlugin {
   options: ServerlessConfig;
@@ -54,7 +27,7 @@ class LogForwardingPlugin {
 
   config: PluginConfig | null = null;
 
-  hooks: object;
+  hooks: Record<string, () => void>;
 
   constructor(serverless: ServerlessInstance, options: ServerlessConfig) {
     this.serverless = serverless;
@@ -65,19 +38,20 @@ class LogForwardingPlugin {
     };
   }
 
-  loadConfig() {
-    this.config = { ...configDefaults, ...this.serverless.service.custom.logForwarding };
+  loadConfig(): void {
+    const { service } = this.serverless;
+    if (!service.custom || !service.custom.logForwarding) {
+      throw new Error('Serverless-log-forwarding configuration not provided.');
+    }
+    this.config = { ...CONFIG_DEFAULTS, ...service.custom.logForwarding };
     if (this.config.destinationARN === undefined) {
       throw new Error('Serverless-log-forwarding is not configured correctly. Please see README for proper setup.');
     }
   }
 
-  /**
-   * Updates CloudFormation resources with log forwarding
-   */
-  updateResources() {
+  updateResources(): void {
     this.loadConfig();
-    const stage = getStage(this.options, this.serverless);
+    const stage = this.getStage();
     if (this.config.stages && !this.config.stages.includes(stage)) {
       this.serverless.cli.log(`Log Forwarding is ignored for ${stage} stage`);
       return;
@@ -89,7 +63,7 @@ class LogForwardingPlugin {
     this.serverless.cli.log('Log Forwarding Resources Updated');
   }
 
-  private getResources() {
+  private getResources(): ResourcesCF {
     const { service } = this.serverless;
     if (service.resources === undefined) {
       service.resources = {
@@ -102,15 +76,14 @@ class LogForwardingPlugin {
     return service.resources.Resources;
   }
 
-  createResourcesObj(): object {
+  createResourcesObj(): ResourcesCF {
     const { service } = this.serverless;
     const resourceObj = {};
 
     const createLambdaPermission = this.config.createLambdaPermission && !this.config.roleArn;
-    const permissionId = 'LogForwardingLambdaPermission';
     if (createLambdaPermission) {
       const permission = this.makeLambdaPermission();
-      resourceObj[permissionId] = permission;
+      resourceObj[PERMISSION_ID] = permission;
     }
 
     _.keys(service.functions)
@@ -120,7 +93,7 @@ class LogForwardingPlugin {
       })
       .forEach((functionName) => {
         const filterId = this.getFilterId(functionName);
-        const dependsOn = createLambdaPermission ? [permissionId] : [];
+        const dependsOn = createLambdaPermission ? [PERMISSION_ID] : [];
         const filter = this.makeSubsctiptionFilter(functionName, dependsOn);
         resourceObj[filterId] = filter;
       });
@@ -134,7 +107,15 @@ class LogForwardingPlugin {
     return `SubscriptionFilter${filterName}`;
   }
 
-  makeSubsctiptionFilter(functionName: string, deps?: string[]): SubscriptionFilter {
+  getStage() {
+    const { stage } = this.options;
+    if (stage && stage !== '') {
+      return stage;
+    }
+    return this.serverless.service.provider.stage;
+  }
+
+  makeSubsctiptionFilter(functionName: string, deps?: string[]): SubscriptionFilterCF {
     const functionObject = this.serverless.service.getFunction(functionName);
     const logGroupName = this.provider.naming.getLogGroupName(functionObject.name);
     const logGroupId = this.provider.naming.getLogGroupLogicalId(functionName);
@@ -151,7 +132,7 @@ class LogForwardingPlugin {
     };
   }
 
-  makeLambdaPermission(): LambdaPermission {
+  makeLambdaPermission(): LambdaPermissionCF {
     const { region } = this.serverless.service.provider;
     const principal = `logs.${region}.amazonaws.com`;
     return {
