@@ -2,16 +2,16 @@ export interface ServerlessInstance {
   service: {
     service: string
     resources: {
-      Resources: {}
+      Resources: Record<string, unknown>
     },
     provider: {
       stage: string,
       region: string
     },
     functions: {
-      name: {}
+      name: object
     },
-    getFunction (name),
+    getFunction (name: string),
     custom: {
       logForwarding: {
         stages: string[] | undefined,
@@ -32,12 +32,12 @@ export interface ServerlessInstance {
   getProvider (name),
   cli: {
     log (str: string, entity?: string),
-    consoleLog (str: any),
+    consoleLog (str: string),
   }
 }
 
 export interface ServerlessConfig {
-  commands: any[];
+  commands: string[];
   options: object;
   stage: string | null;
 }

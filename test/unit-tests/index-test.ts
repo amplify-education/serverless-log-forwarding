@@ -1,8 +1,9 @@
-import {expect} from 'chai';
+import { expect } from 'chai';
 import * as Serverless from 'serverless';
 import * as AwsProvider from 'serverless/lib/plugins/aws/provider';
-import {ServerlessConfig} from '../../src/types';
+import { ServerlessConfig } from '../../src/types';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const LogForwardingPlugin = require('../../src/index');
 
 const correctConfig = {

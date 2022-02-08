@@ -1,13 +1,14 @@
-'use strict';
-
-import * as _ from "underscore"
-import { AWSProvider, ServerlessInstance, ServerlessConfig } from "./types";
+import * as _ from 'underscore';
+import { AWSProvider, ServerlessInstance, ServerlessConfig } from './types';
 
 class LogForwardingPlugin {
-  options: ServerlessConfig
-  provider: AWSProvider
-  serverless: ServerlessInstance
-  hooks: any
+  options: ServerlessConfig;
+
+  provider: AWSProvider;
+
+  serverless: ServerlessInstance;
+
+  hooks;
 
   constructor(serverless: ServerlessInstance, options: ServerlessConfig) {
     this.serverless = serverless;
