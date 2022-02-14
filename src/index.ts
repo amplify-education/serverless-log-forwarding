@@ -89,7 +89,10 @@ class LogForwardingPlugin {
     _.keys(service.functions)
       .filter((functionName) => {
         const { logForwarding = {} } = this.serverless.service.getFunction(functionName);
-        return !(logForwarding.enabled === false);
+        if (logForwarding.enabled === undefined) {
+          return true;
+        }
+        return !!logForwarding.enabled;
       })
       .forEach((functionName) => {
         const filterId = this.getFilterId(functionName);
