@@ -1,9 +1,10 @@
-const chai = require('chai');
-const Serverless = require('serverless');
-const AwsProvider = require('serverless/lib/plugins/aws/provider');
-const LogForwardingPlugin = require('../../index');
+import { expect } from 'chai';
+import * as Serverless from 'serverless';
+import * as AwsProvider from 'serverless/lib/plugins/aws/provider';
+import { ServerlessConfig } from '../../src/types';
 
-const { expect } = chai;
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const LogForwardingPlugin = require('../../src/index');
 
 const correctConfig = {
   destinationARN: 'arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward',
@@ -53,7 +54,7 @@ const createServerless = (config, service) => {
   return serverless;
 };
 
-const constructPluginResources = (logForwarding, functions) => {
+const constructPluginResources = (logForwarding, functions?) => {
   const config = {
     commands: [],
     options: {},
@@ -82,7 +83,7 @@ const constructPluginResources = (logForwarding, functions) => {
     },
     service: 'test-service',
   });
-  return new LogForwardingPlugin(serverless, config);
+  return new LogForwardingPlugin(serverless, config as ServerlessConfig);
 };
 const constructPluginNoResources = (logForwarding) => {
   const config = {
@@ -106,7 +107,7 @@ const constructPluginNoResources = (logForwarding) => {
     service: 'test-service',
   });
   serverless.service.resources = undefined;
-  return new LogForwardingPlugin(serverless, config);
+  return new LogForwardingPlugin(serverless, config as ServerlessConfig);
 };
 
 const constructPluginResourcesWithParam = (logForwarding) => {

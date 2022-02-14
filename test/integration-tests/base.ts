@@ -1,13 +1,13 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const randomstring = require('randomstring');
 
-// this is set in the each sls configs for the cleanup purpose in case of tests failure
-const PLUGIN_IDENTIFIER = 'slf';
-const RANDOM_STRING = randomstring.generate({
+export const PLUGIN_IDENTIFIER = 'slf';
+export const RANDOM_STRING = randomstring.generate({
   capitalization: 'lowercase',
   charset: 'alphanumeric',
   length: 5,
 });
-const TEMP_DIR = `~/tmp/serveless-log-forwarding-integration-tests/${RANDOM_STRING}`;
+export const TEMP_DIR = `~/tmp/serveless-log-forwarding-integration-tests/${RANDOM_STRING}`;
 
 process.env.PLUGIN_IDENTIFIER = PLUGIN_IDENTIFIER;
 process.env.RANDOM_STRING = RANDOM_STRING;
