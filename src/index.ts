@@ -15,9 +15,6 @@ const CONFIG_DEFAULTS = {
   createLambdaPermission: true,
 };
 
-// The key of a lambda permission in CloudFormation resources
-const PERMISSION_ID = 'LogForwardingLambdaPermission';
-
 class LogForwardingPlugin {
   options: ServerlessConfig;
 
@@ -28,6 +25,9 @@ class LogForwardingPlugin {
   config: PluginConfig | null = null;
 
   hooks: Record<string, () => void>;
+
+  // The key of a lambda permission in CloudFormation resources
+  permissionId = 'LogForwardingLambdaPermission';
 
   constructor(serverless: ServerlessInstance, options: ServerlessConfig) {
     this.serverless = serverless;
@@ -83,7 +83,7 @@ class LogForwardingPlugin {
     const createLambdaPermission = this.config.createLambdaPermission && !this.config.roleArn;
     if (createLambdaPermission) {
       const permission = this.makeLambdaPermission();
-      resourceObj[PERMISSION_ID] = permission;
+      resourceObj[this.permissionId] = permission;
     }
 
     _.keys(service.functions)
@@ -93,7 +93,7 @@ class LogForwardingPlugin {
       })
       .forEach((functionName) => {
         const filterId = this.getFilterId(functionName);
-        const dependsOn = createLambdaPermission ? [PERMISSION_ID] : [];
+        const dependsOn = createLambdaPermission ? [this.permissionId] : [];
         const filter = this.makeSubsctiptionFilter(functionName, dependsOn);
         resourceObj[filterId] = filter;
       });
