@@ -40,6 +40,7 @@ jobs:
           node-version: 16.x
           registry-url: 'https://registry.npmjs.org'
       - run: npm install
+      - run: npm run build
 
       - name: Publish new version
         # Note: Setting NODE_AUTH_TOKEN as job|workspace wide env var won't work
