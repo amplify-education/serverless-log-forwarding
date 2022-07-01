@@ -36,6 +36,45 @@ class LogForwardingPlugin {
     this.hooks = {
       'package:initialize': this.updateResources.bind(this),
     };
+
+    // schema for the function section of serverless.yml
+    this.serverless.configSchemaHandler.defineFunctionProperties('aws', {
+      properties: {
+        logForwarding: {
+          type: 'object',
+          properties: {
+            enabled: {
+              type: 'boolean',
+            },
+          },
+          required: ['enabled'],
+        },
+      },
+      required: [],
+    });
+
+    // schema for the custom props section of serverless.yml
+    this.serverless.configSchemaHandler.defineCustomProperties({
+      properties: {
+        logForwarding: {
+          type: 'object',
+          properties: {
+            destinationARN: { type: 'string' },
+            roleArn: { type: 'string' },
+            filterPattern: { type: 'string' },
+            normalizedFilterID: { type: 'string' },
+            stages: {
+              type: 'array',
+              uniqueItems: true,
+              items: { type: 'string' },
+            },
+            createLambdaPermission: { type: 'boolean' },
+          },
+          required: ['destinationARN'],
+        },
+      },
+      required: ['logForwarding'],
+    });
   }
 
   loadConfig(): void {
@@ -45,7 +84,9 @@ class LogForwardingPlugin {
     }
     this.config = { ...CONFIG_DEFAULTS, ...service.custom.logForwarding };
     if (this.config.destinationARN === undefined) {
-      throw new Error('Serverless-log-forwarding is not configured correctly. Please see README for proper setup.');
+      throw new Error(
+        'Serverless-log-forwarding is not configured correctly. Please see README for proper setup.',
+      );
     }
   }
 
@@ -118,11 +159,16 @@ class LogForwardingPlugin {
     return this.serverless.service.provider.stage;
   }
 
-  makeSubsctiptionFilter(functionName: string, deps?: string[]): SubscriptionFilterCF {
+  makeSubsctiptionFilter(
+    functionName: string,
+    deps?: string[],
+  ): SubscriptionFilterCF {
     const functionObject = this.serverless.service.getFunction(functionName);
     const logGroupName = this.provider.naming.getLogGroupName(functionObject.name);
     const logGroupId = this.provider.naming.getLogGroupLogicalId(functionName);
-    const roleObject = this.config.roleArn ? { RoleArn: this.config.roleArn } : {};
+    const roleObject = this.config.roleArn
+      ? { RoleArn: this.config.roleArn }
+      : {};
     return {
       Type: 'AWS::Logs::SubscriptionFilter',
       Properties: {
