@@ -58,11 +58,12 @@ const constructPluginResources = (logForwarding, functions?) => {
   const config = {
     commands: [],
     options: {},
+    stage: 'test-stage',
   };
   const serverless = createServerless(config, {
     provider: {
       region: 'us-moon-1',
-      stage: 'test-stage',
+      stage: config.stage,
     },
     custom: {
       logForwarding,
@@ -89,11 +90,12 @@ const constructPluginNoResources = (logForwarding) => {
   const config = {
     commands: [],
     options: {},
+    stage: 'test-stage',
   };
   const serverless = createServerless(config, {
     provider: {
       region: 'us-moon-1',
-      stage: 'test-stage',
+      stage: config.stage,
     },
     custom: {
       logForwarding,
