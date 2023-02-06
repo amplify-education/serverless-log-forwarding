@@ -52,3 +52,28 @@ jobs:
       - name: Print dirs
         if: failure()
         run: find /home/runner/.npm/_logs/ -type f -exec cat {} \;
+
+      - name: Make changelog
+        id: create_changelog
+        uses: mikepenz/release-changelog-builder-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create zip archive
+        run: zip -r release.zip .
+
+      - name: Generate release tag
+        id: generate_release_tag
+        uses: amitsingh-007/next-release-tag@v1.0.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.generate_release_tag.outputs.release_tag }}
+          files: |
+            release.zip
+          body: ${{steps.create_changelog.outputs.changelog}}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
