@@ -1,11 +1,11 @@
-name: Test, Lint and Publish
+name: Test, Lint, Release and Publish
 on:
   push:
     branches:
       - master
 jobs:
-  publish:
-    name: Publish Node package
+  main:
+    name: Release and publish Node package
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -36,16 +36,10 @@ jobs:
         run: echo "VERSION_CHANGED=$(expr "v${{ steps.extract_version.outputs.version }}" != "${{ steps.get_latest_tag.outputs.tag }}")" >> $GITHUB_ENV
 
       - name: Create tag
-        uses: actions/github-script@v5
+      - uses: rickstaa/action-create-tag@v1
         if: $VERSION_CHANGED
         with:
-          script: |
-            github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/v${{ steps.extract_version.outputs.version }}',
-              sha: context.sha
-            })
+          tag: "v${{ steps.extract_version.outputs.version }}"
 
       - name: Make changelog
         if: $VERSION_CHANGED
