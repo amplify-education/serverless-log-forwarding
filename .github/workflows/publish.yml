@@ -28,8 +28,16 @@ jobs:
         id: extract_version
         uses: Saionaro/extract-package-version@v1.2.1
 
+      - name: Get latest tag
+        id: get_latest_tag
+        uses: actions-ecosystem/action-get-latest-tag@v1
+
+      - name: See if version changed
+        run: echo "VERSION_CHANGED=$(expr "v${{ steps.extract_version.outputs.version }}" != "${{ steps.get_latest_tag.outputs.tag }}")" >> $GITHUB_ENV
+
       - name: Create tag
         uses: actions/github-script@v5
+        if: $VERSION_CHANGED
         with:
           script: |
             github.rest.git.createRef({
@@ -40,6 +48,7 @@ jobs:
             })
 
       - name: Make changelog
+        if: $VERSION_CHANGED
         id: create_changelog
         uses: mikepenz/release-changelog-builder-action@v3
         env:
@@ -48,6 +57,7 @@ jobs:
           - toTag: 'v${{ steps.extract_version.outputs.version }}'
 
       - name: Create release
+        if: $VERSION_CHANGED
         uses: softprops/action-gh-release@v1
         with:
           tag_name: 'v${{ steps.extract_version.outputs.version }}'
@@ -56,6 +66,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish new version
+        if: $VERSION_CHANGED
         # Note: Setting NODE_AUTH_TOKEN as job|workspace wide env var won't work
         #       as it appears actions/setup-node sets own value
         env:
