@@ -30,16 +30,22 @@ jobs:
         uses: actions-ecosystem/action-get-latest-tag@v1
 
       - name: See if version changed
-        run: echo "VERSION_CHANGED=$(expr "v${{ steps.extract_version.outputs.version }}" != "${{ steps.get_latest_tag.outputs.tag }}")" >> $GITHUB_ENV
+        run: |
+          if [[ "v${{ steps.extract_version.outputs.version }}" == "${{ steps.get_latest_tag.outputs.tag }}" ]]; then
+            echo "VERSION_CHANGED=false" >> "$GITHUB_ENV"
+          else
+            echo "VERSION_CHANGED=true" >> "$GITHUB_ENV"
+          fi
+
 
       - name: Create tag
         uses: rickstaa/action-create-tag@v1
-        if: ${{ env.VERSION_CHANGED }}
+        if: ${{ env.VERSION_CHANGED == "true" }}
         with:
           tag: "v${{ steps.extract_version.outputs.version }}"
 
       - name: Make changelog
-        if: ${{ env.VERSION_CHANGED }}
+        if: ${{ env.VERSION_CHANGED == "true" }}
         id: create_changelog
         uses: mikepenz/release-changelog-builder-action@v3
         env:
@@ -48,7 +54,7 @@ jobs:
           toTag: 'v${{ steps.extract_version.outputs.version }}'
 
       - name: Create release
-        if: ${{ env.VERSION_CHANGED }}
+        if: ${{ env.VERSION_CHANGED == "true" }}
         uses: softprops/action-gh-release@v1
         with:
           tag_name: 'v${{ steps.extract_version.outputs.version }}'
@@ -57,7 +63,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish new version
-        if: ${{ env.VERSION_CHANGED }}
+        if: ${{ env.VERSION_CHANGED == "true" }}
         # Note: Setting NODE_AUTH_TOKEN as job|workspace wide env var won't work
         #       as it appears actions/setup-node sets own value
         env:
