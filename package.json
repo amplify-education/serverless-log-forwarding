@@ -1,6 +1,6 @@
 {
   "name": "serverless-log-forwarding",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "a serverless plugin to forward logs to given lambda function",
   "keywords": [
     "serverless",
