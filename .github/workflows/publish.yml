@@ -37,12 +37,12 @@ jobs:
 
       - name: Create tag
         uses: rickstaa/action-create-tag@v1
-        if: $VERSION_CHANGED
+        if: ${{ env.VERSION_CHANGED }}
         with:
           tag: "v${{ steps.extract_version.outputs.version }}"
 
       - name: Make changelog
-        if: $VERSION_CHANGED
+        if: ${{ env.VERSION_CHANGED }}
         id: create_changelog
         uses: mikepenz/release-changelog-builder-action@v3
         env:
@@ -51,7 +51,7 @@ jobs:
           toTag: 'v${{ steps.extract_version.outputs.version }}'
 
       - name: Create release
-        if: $VERSION_CHANGED
+        if: ${{ env.VERSION_CHANGED }}
         uses: softprops/action-gh-release@v1
         with:
           tag_name: 'v${{ steps.extract_version.outputs.version }}'
@@ -60,7 +60,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish new version
-        if: $VERSION_CHANGED
+        if: ${{ env.VERSION_CHANGED }}
         # Note: Setting NODE_AUTH_TOKEN as job|workspace wide env var won't work
         #       as it appears actions/setup-node sets own value
         env:
