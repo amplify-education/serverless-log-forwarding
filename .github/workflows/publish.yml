@@ -7,9 +7,6 @@ jobs:
   main:
     name: Release and publish Node package
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [ 14.x, 16.x, 18.x ]
     steps:
       - name: Checkout repository
         uses: actions/checkout@master
