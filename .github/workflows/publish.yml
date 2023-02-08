@@ -36,7 +36,7 @@ jobs:
         run: echo "VERSION_CHANGED=$(expr "v${{ steps.extract_version.outputs.version }}" != "${{ steps.get_latest_tag.outputs.tag }}")" >> $GITHUB_ENV
 
       - name: Create tag
-      - uses: rickstaa/action-create-tag@v1
+        uses: rickstaa/action-create-tag@v1
         if: $VERSION_CHANGED
         with:
           tag: "v${{ steps.extract_version.outputs.version }}"
