@@ -37,28 +37,18 @@ jobs:
             echo "VERSION_CHANGED=true" >> "$GITHUB_ENV"
           fi
 
-
       - name: Create tag
         uses: rickstaa/action-create-tag@v1
         if: env.VERSION_CHANGED == 'true'
         with:
           tag: "v${{ steps.extract_version.outputs.version }}"
 
-      - name: Make changelog
-        if: env.VERSION_CHANGED == 'true'
-        id: create_changelog
-        uses: mikepenz/release-changelog-builder-action@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          toTag: 'v${{ steps.extract_version.outputs.version }}'
-
       - name: Create release
         if: env.VERSION_CHANGED == 'true'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: 'v${{ steps.extract_version.outputs.version }}'
-          body: ${{steps.create_changelog.outputs.changelog}}
+          generate_release_notes: 1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
