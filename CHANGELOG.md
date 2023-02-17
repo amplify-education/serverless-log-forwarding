@@ -5,13 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [3.1.0] - 2022-02-17
+## [3.1.0] - 2023-02-17
 
 ### Added
 
 - Node version minimal requirements upgraded from 12.x to 14.x.
 - Upgraded aws-sdk, eslint, mocha, serverless, typescript and some other packages.
 - npm bin changed to npx because of first command's deprecation.
+
+## [3.0.2] - 2023-02-09
+
+### Added
+
+- Github workflow adjustment
+
+## [3.0.1] - 2022-02-28
+
+### Added
+
+- Fixes for build
 
 ## [3.0.0] - 2022-02-03
 
