@@ -40,14 +40,14 @@ async function createTempDir(tempDir: string, folderName: string) {
  * Runs `sls deploy` for the given folder
  */
 function slsDeploy(tempDir: string): Promise<string> {
-  return exec(`cd ${tempDir} && serverless deploy`);
+  return exec(`cd ${tempDir} && npx serverless deploy`);
 }
 
 /**
  * Runs `sls remove` for the given folder
  */
 function slsRemove(tempDir: string): Promise<string> {
-  return exec(`cd ${tempDir} && serverless remove`);
+  return exec(`cd ${tempDir} && npx serverless remove`);
 }
 
 /**
