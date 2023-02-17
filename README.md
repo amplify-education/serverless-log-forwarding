@@ -59,22 +59,41 @@ functions:
 ```
 
 ## Running Tests
-
-To run the test:
-
-```shell
-npm test
+To run unit tests:
+```
+npm run test
 ```
 
-All tests should pass.
+For running integration tests you will need to log into you AWS account 
+and set AWS_PROFILE environment variable, 
+it will be used to create AWS entities for testing purposes
+```
+export AWS_PROFILE=<profile_name>
 
-If there is an error update the node_module inside the serverless-log-forwarding folder:
+npm run integration-test
+```
 
-```shell
+All tests should pass. All unit tests should pass before merging.
+Integration tests will probably take some time
+
+If there is an error update the node_modules inside the root folder of the directory:
+```
 npm install
 ```
 
+## Writing Integration Tests
+Unit tests are found in `test/unit-tests`. 
+Integration tests are found in `test/integration-tests`. 
+
+`test/integration-tests` contains configs folder, 
+for every test there is a folder with `serverless.yml` configuration and `logs_producer.py`.
+
+To add another test create a folder for your test with the folder name that corresponds to test name
+and add code to run test to `test/integration-tests/integration-tests.ts`
+
+
 ## Deploying
+
 ---------
 The plugin will be packaged with the lambda when deployed as normal using Serverless:
 

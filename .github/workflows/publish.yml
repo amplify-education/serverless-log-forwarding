@@ -28,6 +28,8 @@ jobs:
       - name: Get latest tag
         id: get_latest_tag
         uses: actions-ecosystem/action-get-latest-tag@v1
+        with:
+          initial_version: 'v${{ steps.extract_version.outputs.version }}'
 
       - name: See if version changed
         run: |
@@ -48,7 +50,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: 'v${{ steps.extract_version.outputs.version }}'
-          generate_release_notes: 1
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
