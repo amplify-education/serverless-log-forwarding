@@ -1,3 +1,19 @@
+export interface ObjectCF<TProps> {
+  Type: string;
+  DependsOn?: string[];
+  Properties: TProps;
+}
+
+export type ResourcesCF = Record<string, ObjectCF<unknown>>;
+
+export interface AWSProvider {
+  naming: {
+    getLogGroupName (name: string): string,
+    getNormalizedFunctionName (name: string): string,
+    getLogGroupLogicalId (name: string): string
+  }
+}
+
 export interface SlsFunction {
   name: string;
   logForwarding?: {
@@ -37,7 +53,9 @@ export interface ServerlessInstance {
       getRegion (): string,
     },
   },
+
   getProvider (name: string): AWSProvider,
+
   cli: {
     log (str: string, entity?: string): void,
     consoleLog (str: string): void,
@@ -50,22 +68,6 @@ export interface ServerlessConfig {
   stage: string | null;
 }
 
-export interface AWSProvider {
-  naming: {
-    getLogGroupName(name: string): string,
-    getNormalizedFunctionName(name: string): string,
-    getLogGroupLogicalId(name: string): string
-  }
-}
-
-export interface ObjectCF<TProps> {
-  Type: string;
-  DependsOn?: string[];
-  Properties: TProps;
-}
-
-export type ResourcesCF = Record<string, ObjectCF<unknown>>;
-
 export interface LambdaPermissionProps {
   Action: string;
   Principal: string;
@@ -77,6 +79,26 @@ export interface SubscriptionFilterProps {
   FilterPattern: string;
   LogGroupName: string;
   RoleArn?: string;
+}
+
+interface ServerlessProgress {
+  update (message: string): void
+
+  remove (): void
+}
+
+export interface ServerlessProgressFactory {
+  get (name: string): ServerlessProgress;
+}
+
+export interface ServerlessUtils {
+  writeText: (message: string) => void,
+  log: ((message: string) => void) & {
+    error (message: string): void
+    verbose (message: string): void
+    warning (message: string): void
+  }
+  progress: ServerlessProgressFactory
 }
 
 export type LambdaPermissionCF = ObjectCF<LambdaPermissionProps>;
