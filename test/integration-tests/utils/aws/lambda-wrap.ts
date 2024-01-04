@@ -10,8 +10,11 @@ import {
   GetPolicyResponse,
   LambdaClient, RemovePermissionCommand
 } from "@aws-sdk/client-lambda";
+import { sleep } from "../test-utilities";
 
 const FUNC_ZIP_PATH = "test/integration-tests/fixtures/logs-receiver.zip";
+const MAX_FUNC_ACTIVE_RETRY = 3;
+const FUNC_ACTIVE_TIMEOUT_SEC = 10;
 
 export default class LambdaWrap {
   private lambdaClient: LambdaClient;
@@ -37,13 +40,18 @@ export default class LambdaWrap {
     }));
   }
 
-  async ensureFunctionActive (funcName: string): Promise<void> {
+  async ensureFunctionActive (funcName: string, retry: number = 1): Promise<void> {
+    if (retry > MAX_FUNC_ACTIVE_RETRY) {
+      throw new Error("Max retry reached");
+    }
+
     const resp: GetFunctionResponse = await this.lambdaClient.send(new GetFunctionCommand({
       FunctionName: funcName
     }));
 
     if (resp.Configuration.State !== "Active") {
-      throw new Error("retry");
+      await sleep(FUNC_ACTIVE_TIMEOUT_SEC * 1000);
+      await this.ensureFunctionActive(funcName, retry + 1);
     }
   }
 

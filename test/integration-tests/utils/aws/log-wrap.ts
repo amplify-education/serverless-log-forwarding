@@ -1,6 +1,5 @@
 import {
   CloudWatchLogsClient,
-  DeleteLogGroupCommand,
   DescribeSubscriptionFiltersCommand,
   SubscriptionFilter
 } from "@aws-sdk/client-cloudwatch-logs";
@@ -10,12 +9,6 @@ export default class LogWrap {
 
   constructor (region: string) {
     this.cwlClient = new CloudWatchLogsClient({ region });
-  }
-
-  async removeLambdaLogs (logGroupName: string) {
-    await this.cwlClient.send(new DeleteLogGroupCommand({
-      logGroupName: logGroupName
-    }));
   }
 
   async getSubscriptionFilter (logGroupName: string, destinationArn: string): Promise<SubscriptionFilter | null> {

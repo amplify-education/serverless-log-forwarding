@@ -46,42 +46,42 @@ class LogForwardingPlugin {
     }
 
     // schema for the function section of serverless.yml
-    this.serverless.configSchemaHandler.defineFunctionProperties('aws', {
+    this.serverless.configSchemaHandler.defineFunctionProperties("aws", {
       properties: {
         logForwarding: {
-          type: 'object',
+          type: "object",
           properties: {
             enabled: {
-              type: 'boolean',
-            },
+              type: "boolean"
+            }
           },
-          required: ['enabled'],
-        },
+          required: ["enabled"]
+        }
       },
-      required: [],
+      required: []
     });
 
     // schema for the custom props section of serverless.yml
     this.serverless.configSchemaHandler.defineCustomProperties({
       properties: {
         logForwarding: {
-          type: 'object',
+          type: "object",
           properties: {
-            destinationARN: { type: 'string' },
-            roleArn: { type: 'string' },
-            filterPattern: { type: 'string' },
-            normalizedFilterID: { type: 'string' },
+            destinationARN: { type: "string" },
+            roleArn: { type: "string" },
+            filterPattern: { type: "string" },
+            normalizedFilterID: { type: "string" },
             stages: {
-              type: 'array',
+              type: "array",
               uniqueItems: true,
-              items: { type: 'string' },
+              items: { type: "string" }
             },
-            createLambdaPermission: { type: 'boolean' },
+            createLambdaPermission: { type: "boolean" }
           },
-          required: ['destinationARN'],
-        },
+          required: ["destinationARN"]
+        }
       },
-      required: ['logForwarding'],
+      required: ["logForwarding"]
     });
   }
 

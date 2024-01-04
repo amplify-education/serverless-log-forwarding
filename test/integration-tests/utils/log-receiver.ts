@@ -8,6 +8,7 @@
 import IamWrap from "./aws/iam-wrap";
 import LambdaWrap from "./aws/lambda-wrap";
 import LogWrap from "./aws/log-wrap";
+import { sleep } from "./test-utilities";
 
 /**
  * Interface for the immutable objects with information about
@@ -37,11 +38,11 @@ export default class LogReceiver {
    * that it's active. Returns the information about objects.
    */
   public async setUpLogsReceiver (): Promise<LogsReceiverData> {
+    // setup lambda role
     const role = await this.iamWrap.setupLambdaRole(this.resourceName);
-    // eslint-disable-next-line no-promise-executor-return,promise/param-names
-    // await new Promise((r) => setTimeout(r, 10000));
+    // we need to wait around 10 seconds to use the role
+    await sleep(10 * 1000);
     const funcData = await this.lambdaWrap.createDummyFunction(this.resourceName, role.Arn);
-
     await this.lambdaWrap.ensureFunctionActive(funcData.FunctionName);
 
     return {
@@ -59,21 +60,12 @@ export default class LogReceiver {
       await this.lambdaWrap.removeFunction(this.resourceName);
       console.debug("Logs receiver lambda was deleted");
     } catch (e) {
-      console.error(e);
       console.debug("Failed to delete a logs receiver");
-    }
-    try {
-      await this.logWrap.removeLambdaLogs(`/aws/lambda/${this.resourceName}`);
-      console.log("Log receiver's log group was deleted");
-    } catch (e) {
-      console.error(e);
-      console.debug("Failed to delete a logs receiver's log group");
     }
     try {
       await this.iamWrap.removeLambdaRole(this.resourceName);
       console.log("Log receiver's role was deleted");
     } catch (e) {
-      console.error(e);
       console.debug("Failed to delete the execution role");
     }
   }

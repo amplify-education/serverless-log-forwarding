@@ -86,6 +86,10 @@ export function getLogGroup (testName: string, stage: string, functionId: string
   return `/aws/lambda/${functionName}`;
 }
 
+export function sleep (ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function runTest (testName: string, assertFunc): Promise<void> {
   try {
     const configFolder = `configs/${testName}`;
