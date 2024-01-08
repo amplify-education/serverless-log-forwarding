@@ -6,17 +6,6 @@ export default class Logging {
   }
 
   /**
-     * Logs error message
-     */
-  public static logError (message: string): void {
-    if (Globals.v3Utils) {
-      Globals.v3Utils.log.error(message);
-    } else {
-      Logging.cliLog("[Error]", message);
-    }
-  }
-
-  /**
      * Logs info message
      */
   public static logInfo (message: string): void {

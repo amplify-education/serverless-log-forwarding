@@ -1,54 +1,18 @@
 import { expect } from "chai";
-import * as Serverless from "serverless";
-import * as AwsProvider from "serverless/lib/plugins/aws/provider";
-import { ServerlessConfig } from "../../src/types";
+import Serverless from "serverless/lib/serverless";
+import AwsProvider from "serverless/lib/plugins/aws/provider";
+import { ServerlessConfig, ServerlessInstance } from "../../src/types";
+import LogForwardingPlugin = require("../../src");
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const LogForwardingPlugin = require("../../src/index");
-
-const correctConfig = {
-  destinationARN: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward"
-};
-const correctConfigFromParam = {
-  destinationARN: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-dev-forward"
-};
-const correctConfigWithFilterPattern = {
-  destinationARN: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward",
-  filterPattern: "Test Pattern",
-  normalizedFilterID: false
-};
-const correctConfigWithStageFilter = {
-  destinationARN: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward",
-  filterPattern: "Test Pattern",
-  stages: ["production"]
-};
-
-const correctConfigWithRoleArn = {
-  destinationARN: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward",
-  roleArn: "arn:aws:lambda:us-moon-1:314159265358:role/test-iam-role",
-  normalizedFilterID: false
-};
-
-const correctConfigWithDisabledLambdaPermission = {
-  destinationARN: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward",
-  normalizedFilterID: false,
-  createLambdaPermission: false
-};
-
-const correctConfigWithDisabledLambdaPermissionAndRoleArn = {
-  destinationARN: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward",
-  roleArn: "arn:aws:lambda:us-moon-1:314159265358:role/test-iam-role",
-  normalizedFilterID: false,
-  createLambdaPermission: false
-};
-
+const TEST_DESTINATION_ARN = "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward";
 const createServerless = (config, service) => {
   const serverless = new Serverless(config);
   serverless.cli = {
     log () {
     }
   };
-  new AwsProvider(serverless, config); // eslint-disable-line no-new
+  // eslint-disable-next-line no-new
+  new AwsProvider(serverless, config);
   serverless.service.update(service);
   serverless.service.setFunctionNames(config);
   return serverless;
@@ -60,7 +24,9 @@ const constructPluginResources = (logForwarding, functions?) => {
     options: {}
   };
   const serverless = createServerless(config, {
+    service: "test-service",
     provider: {
+      name: "aws",
       region: "us-moon-1",
       stage: "test-stage"
     },
@@ -78,12 +44,10 @@ const constructPluginResources = (logForwarding, functions?) => {
       testFunctionOne: {
         filterPattern: "Pattern"
       },
-      testFunctionTwo: {
-      }
-    },
-    service: "test-service"
+      testFunctionTwo: {}
+    }
   });
-  return new LogForwardingPlugin(serverless, config as ServerlessConfig);
+  return new LogForwardingPlugin(serverless as ServerlessInstance, config as ServerlessConfig);
 };
 const constructPluginNoResources = (logForwarding) => {
   const config = {
@@ -99,17 +63,14 @@ const constructPluginNoResources = (logForwarding) => {
       logForwarding
     },
     functions: {
-      testFunctionOne: {
-      },
-      testFunctionTwo: {
-      }
+      testFunctionOne: {},
+      testFunctionTwo: {}
     },
     service: "test-service"
   });
   serverless.service.resources = undefined;
-  return new LogForwardingPlugin(serverless, config as ServerlessConfig);
+  return new LogForwardingPlugin(serverless as ServerlessInstance, config as ServerlessConfig);
 };
-
 const constructPluginResourcesWithParam = (logForwarding) => {
   const options = {
     commands: [],
@@ -118,6 +79,7 @@ const constructPluginResourcesWithParam = (logForwarding) => {
   };
   const serverless = createServerless(options, {
     provider: {
+      name: "aws",
       region: "us-moon-1",
       stage: "test-stage"
     },
@@ -135,17 +97,18 @@ const constructPluginResourcesWithParam = (logForwarding) => {
       testFunctionOne: {
         filterPattern: "Pattern"
       },
-      testFunctionTwo: {
-      }
+      testFunctionTwo: {}
     },
     service: "test-service"
   });
-  return new LogForwardingPlugin(serverless, options);
+  return new LogForwardingPlugin(serverless as ServerlessInstance, options);
 };
 
 describe("Given a serverless config", () => {
   it("updates the resources object if it already exists", () => {
-    const plugin = constructPluginResources(correctConfig);
+    const plugin = constructPluginResources({
+      destinationARN: TEST_DESTINATION_ARN
+    });
     const expectedResources = {
       Resources: {
         TestExistingFilter: {
@@ -154,7 +117,7 @@ describe("Given a serverless config", () => {
         LogForwardingLambdaPermission: {
           Type: "AWS::Lambda::Permission",
           Properties: {
-            FunctionName: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward",
+            FunctionName: TEST_DESTINATION_ARN,
             Action: "lambda:InvokeFunction",
             Principal: "logs.us-moon-1.amazonaws.com"
           }
@@ -162,7 +125,7 @@ describe("Given a serverless config", () => {
         SubscriptionFilterTestFunctionOne: {
           Type: "AWS::Logs::SubscriptionFilter",
           Properties: {
-            DestinationArn: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward",
+            DestinationArn: TEST_DESTINATION_ARN,
             FilterPattern: "",
             LogGroupName: "/aws/lambda/test-service-test-stage-testFunctionOne"
           },
@@ -174,7 +137,7 @@ describe("Given a serverless config", () => {
         SubscriptionFilterTestFunctionTwo: {
           Type: "AWS::Logs::SubscriptionFilter",
           Properties: {
-            DestinationArn: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward",
+            DestinationArn: TEST_DESTINATION_ARN,
             FilterPattern: "",
             LogGroupName: "/aws/lambda/test-service-test-stage-testFunctionTwo"
           },
@@ -189,7 +152,9 @@ describe("Given a serverless config", () => {
     expect(plugin.serverless.service.resources).to.eql(expectedResources);
   });
   it("updates the resources object if it already exists with params", () => {
-    const plugin = constructPluginResourcesWithParam(correctConfigFromParam);
+    const plugin = constructPluginResourcesWithParam({
+      destinationARN: TEST_DESTINATION_ARN
+    });
     const expectedResources = {
       Resources: {
         TestExistingFilter: {
@@ -198,7 +163,7 @@ describe("Given a serverless config", () => {
         LogForwardingLambdaPermission: {
           Type: "AWS::Lambda::Permission",
           Properties: {
-            FunctionName: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-dev-forward",
+            FunctionName: TEST_DESTINATION_ARN,
             Action: "lambda:InvokeFunction",
             Principal: "logs.us-moon-1.amazonaws.com"
           }
@@ -206,7 +171,7 @@ describe("Given a serverless config", () => {
         SubscriptionFilterTestFunctionOne: {
           Type: "AWS::Logs::SubscriptionFilter",
           Properties: {
-            DestinationArn: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-dev-forward",
+            DestinationArn: TEST_DESTINATION_ARN,
             FilterPattern: "",
             LogGroupName: "/aws/lambda/test-service-dev-testFunctionOne"
           },
@@ -218,7 +183,7 @@ describe("Given a serverless config", () => {
         SubscriptionFilterTestFunctionTwo: {
           Type: "AWS::Logs::SubscriptionFilter",
           Properties: {
-            DestinationArn: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-dev-forward",
+            DestinationArn: TEST_DESTINATION_ARN,
             FilterPattern: "",
             LogGroupName: "/aws/lambda/test-service-dev-testFunctionTwo"
           },
@@ -233,13 +198,15 @@ describe("Given a serverless config", () => {
     expect(plugin.serverless.service.resources).to.eql(expectedResources);
   });
   it("updates the resources object if it doesn't exist", () => {
-    const plugin = constructPluginNoResources(correctConfig);
+    const plugin = constructPluginNoResources({
+      destinationARN: TEST_DESTINATION_ARN
+    });
     const expectedResources = {
       Resources: {
         LogForwardingLambdaPermission: {
           Type: "AWS::Lambda::Permission",
           Properties: {
-            FunctionName: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward",
+            FunctionName: TEST_DESTINATION_ARN,
             Action: "lambda:InvokeFunction",
             Principal: "logs.us-moon-1.amazonaws.com"
           }
@@ -247,7 +214,7 @@ describe("Given a serverless config", () => {
         SubscriptionFilterTestFunctionOne: {
           Type: "AWS::Logs::SubscriptionFilter",
           Properties: {
-            DestinationArn: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward",
+            DestinationArn: TEST_DESTINATION_ARN,
             FilterPattern: "",
             LogGroupName: "/aws/lambda/test-service-test-stage-testFunctionOne"
           },
@@ -259,7 +226,7 @@ describe("Given a serverless config", () => {
         SubscriptionFilterTestFunctionTwo: {
           Type: "AWS::Logs::SubscriptionFilter",
           Properties: {
-            DestinationArn: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward",
+            DestinationArn: TEST_DESTINATION_ARN,
             FilterPattern: "",
             LogGroupName: "/aws/lambda/test-service-test-stage-testFunctionTwo"
           },
@@ -274,7 +241,11 @@ describe("Given a serverless config", () => {
     expect(plugin.serverless.service.resources).to.eql(expectedResources);
   });
   it("uses the filterPattern property if set", () => {
-    const plugin = constructPluginResources(correctConfigWithFilterPattern);
+    const plugin = constructPluginResources({
+      destinationARN: TEST_DESTINATION_ARN,
+      filterPattern: "Test Pattern",
+      normalizedFilterID: false
+    });
     const expectedResources = {
       Resources: {
         TestExistingFilter: {
@@ -283,7 +254,7 @@ describe("Given a serverless config", () => {
         LogForwardingLambdaPermission: {
           Type: "AWS::Lambda::Permission",
           Properties: {
-            FunctionName: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward",
+            FunctionName: TEST_DESTINATION_ARN,
             Action: "lambda:InvokeFunction",
             Principal: "logs.us-moon-1.amazonaws.com"
           }
@@ -291,7 +262,7 @@ describe("Given a serverless config", () => {
         SubscriptionFiltertestFunctionOne: {
           Type: "AWS::Logs::SubscriptionFilter",
           Properties: {
-            DestinationArn: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward",
+            DestinationArn: TEST_DESTINATION_ARN,
             FilterPattern: "Test Pattern",
             LogGroupName: "/aws/lambda/test-service-test-stage-testFunctionOne"
           },
@@ -303,7 +274,7 @@ describe("Given a serverless config", () => {
         SubscriptionFiltertestFunctionTwo: {
           Type: "AWS::Logs::SubscriptionFilter",
           Properties: {
-            DestinationArn: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward",
+            DestinationArn: TEST_DESTINATION_ARN,
             FilterPattern: "Test Pattern",
             LogGroupName: "/aws/lambda/test-service-test-stage-testFunctionTwo"
           },
@@ -318,9 +289,12 @@ describe("Given a serverless config", () => {
     expect(plugin.serverless.service.resources).to.eql(expectedResources);
   });
   it("excludes functions with logForwarding.enabled=false from AWS::Logs::SubscriptionFilter output", () => {
-    const plugin = constructPluginResources(correctConfigWithFilterPattern, {
-      testFunctionOne: {
-      },
+    const plugin = constructPluginResources({
+      destinationARN: TEST_DESTINATION_ARN,
+      filterPattern: "Test Pattern",
+      normalizedFilterID: false
+    }, {
+      testFunctionOne: {},
       testFunctionTwo: {
         logForwarding: {}
       },
@@ -343,7 +317,7 @@ describe("Given a serverless config", () => {
         LogForwardingLambdaPermission: {
           Type: "AWS::Lambda::Permission",
           Properties: {
-            FunctionName: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward",
+            FunctionName: TEST_DESTINATION_ARN,
             Action: "lambda:InvokeFunction",
             Principal: "logs.us-moon-1.amazonaws.com"
           }
@@ -351,7 +325,7 @@ describe("Given a serverless config", () => {
         SubscriptionFiltertestFunctionOne: {
           Type: "AWS::Logs::SubscriptionFilter",
           Properties: {
-            DestinationArn: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward",
+            DestinationArn: TEST_DESTINATION_ARN,
             FilterPattern: "Test Pattern",
             LogGroupName: "/aws/lambda/test-service-test-stage-testFunctionOne"
           },
@@ -363,7 +337,7 @@ describe("Given a serverless config", () => {
         SubscriptionFiltertestFunctionTwo: {
           Type: "AWS::Logs::SubscriptionFilter",
           Properties: {
-            DestinationArn: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward",
+            DestinationArn: TEST_DESTINATION_ARN,
             FilterPattern: "Test Pattern",
             LogGroupName: "/aws/lambda/test-service-test-stage-testFunctionTwo"
           },
@@ -375,7 +349,7 @@ describe("Given a serverless config", () => {
         SubscriptionFiltertestFunctionThree: {
           Type: "AWS::Logs::SubscriptionFilter",
           Properties: {
-            DestinationArn: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward",
+            DestinationArn: TEST_DESTINATION_ARN,
             FilterPattern: "Test Pattern",
             LogGroupName: "/aws/lambda/test-service-test-stage-testFunctionThree"
           },
@@ -390,7 +364,11 @@ describe("Given a serverless config", () => {
     expect(plugin.serverless.service.resources).to.eql(expectedResources);
   });
   it("uses stage filter if set", () => {
-    const plugin = constructPluginResources(correctConfigWithStageFilter);
+    const plugin = constructPluginResources({
+      destinationARN: TEST_DESTINATION_ARN,
+      filterPattern: "Test Pattern",
+      stages: ["production"]
+    });
     const expectedResources = {
       Resources: {
         TestExistingFilter: {
@@ -402,7 +380,11 @@ describe("Given a serverless config", () => {
     expect(plugin.serverless.service.resources).to.eql(expectedResources);
   });
   it("uses the roleArn property if set", () => {
-    const plugin = constructPluginResources(correctConfigWithRoleArn);
+    const plugin = constructPluginResources({
+      destinationARN: TEST_DESTINATION_ARN,
+      roleArn: "arn:aws:lambda:us-moon-1:314159265358:role/test-iam-role",
+      normalizedFilterID: false
+    });
 
     const expectedResources = {
       Resources: {
@@ -412,7 +394,7 @@ describe("Given a serverless config", () => {
         SubscriptionFiltertestFunctionOne: {
           Type: "AWS::Logs::SubscriptionFilter",
           Properties: {
-            DestinationArn: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward",
+            DestinationArn: TEST_DESTINATION_ARN,
             FilterPattern: "",
             LogGroupName: "/aws/lambda/test-service-test-stage-testFunctionOne",
             RoleArn: "arn:aws:lambda:us-moon-1:314159265358:role/test-iam-role"
@@ -424,7 +406,7 @@ describe("Given a serverless config", () => {
         SubscriptionFiltertestFunctionTwo: {
           Type: "AWS::Logs::SubscriptionFilter",
           Properties: {
-            DestinationArn: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward",
+            DestinationArn: TEST_DESTINATION_ARN,
             FilterPattern: "",
             LogGroupName: "/aws/lambda/test-service-test-stage-testFunctionTwo",
             RoleArn: "arn:aws:lambda:us-moon-1:314159265358:role/test-iam-role"
@@ -439,7 +421,11 @@ describe("Given a serverless config", () => {
     expect(plugin.serverless.service.resources).to.eql(expectedResources);
   });
   it("uses the disabledLambdaPermission property if set to not include the LogForwardingLambdaPermission", () => {
-    const plugin = constructPluginResources(correctConfigWithDisabledLambdaPermission);
+    const plugin = constructPluginResources({
+      destinationARN: TEST_DESTINATION_ARN,
+      normalizedFilterID: false,
+      createLambdaPermission: false
+    });
     const expectedResources = {
       Resources: {
         TestExistingFilter: {
@@ -448,7 +434,7 @@ describe("Given a serverless config", () => {
         SubscriptionFiltertestFunctionOne: {
           Type: "AWS::Logs::SubscriptionFilter",
           Properties: {
-            DestinationArn: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward",
+            DestinationArn: TEST_DESTINATION_ARN,
             FilterPattern: "",
             LogGroupName: "/aws/lambda/test-service-test-stage-testFunctionOne"
           },
@@ -459,7 +445,7 @@ describe("Given a serverless config", () => {
         SubscriptionFiltertestFunctionTwo: {
           Type: "AWS::Logs::SubscriptionFilter",
           Properties: {
-            DestinationArn: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward",
+            DestinationArn: TEST_DESTINATION_ARN,
             FilterPattern: "",
             LogGroupName: "/aws/lambda/test-service-test-stage-testFunctionTwo"
           },
@@ -473,7 +459,12 @@ describe("Given a serverless config", () => {
     expect(plugin.serverless.service.resources).to.eql(expectedResources);
   });
   it("uses the roleArn even if disabledLambdaPermission property is set", () => {
-    const plugin = constructPluginResources(correctConfigWithDisabledLambdaPermissionAndRoleArn);
+    const plugin = constructPluginResources({
+      destinationARN: TEST_DESTINATION_ARN,
+      roleArn: "arn:aws:lambda:us-moon-1:314159265358:role/test-iam-role",
+      normalizedFilterID: false,
+      createLambdaPermission: false
+    });
     const expectedResources = {
       Resources: {
         TestExistingFilter: {
@@ -482,7 +473,7 @@ describe("Given a serverless config", () => {
         SubscriptionFiltertestFunctionOne: {
           Type: "AWS::Logs::SubscriptionFilter",
           Properties: {
-            DestinationArn: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward",
+            DestinationArn: TEST_DESTINATION_ARN,
             FilterPattern: "",
             LogGroupName: "/aws/lambda/test-service-test-stage-testFunctionOne",
             RoleArn: "arn:aws:lambda:us-moon-1:314159265358:role/test-iam-role"
@@ -494,7 +485,7 @@ describe("Given a serverless config", () => {
         SubscriptionFiltertestFunctionTwo: {
           Type: "AWS::Logs::SubscriptionFilter",
           Properties: {
-            DestinationArn: "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward",
+            DestinationArn: TEST_DESTINATION_ARN,
             FilterPattern: "",
             LogGroupName: "/aws/lambda/test-service-test-stage-testFunctionTwo",
             RoleArn: "arn:aws:lambda:us-moon-1:314159265358:role/test-iam-role"
