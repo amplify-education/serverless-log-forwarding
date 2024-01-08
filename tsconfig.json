@@ -3,15 +3,21 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "rootDir": ".",
-    "target": "es5",
+    "target": "es6",
     "sourceMap": false,
     "outDir": "dist",
     "types": [
       "mocha",
       "node"
-    ]
+    ],
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true
   },
   "include": [
     "src/**/*.ts"
+  ],
+  "exclude": [
+    "test/**/*.ts"
   ]
 }

@@ -1,4 +1,4 @@
-import * as _ from 'underscore';
+import * as _ from "underscore";
 import type {
   AWSProvider,
   ServerlessInstance,
@@ -7,12 +7,15 @@ import type {
   ResourcesCF,
   SubscriptionFilterCF,
   LambdaPermissionCF,
-} from './types';
+  ServerlessUtils
+} from "./types";
+import Globals from "./globals";
+import Logging from "./logging";
 
 const CONFIG_DEFAULTS = {
-  filterPattern: '',
+  filterPattern: "",
   normalizedFilterID: true,
-  createLambdaPermission: true,
+  createLambdaPermission: true
 };
 
 class LogForwardingPlugin {
@@ -27,88 +30,91 @@ class LogForwardingPlugin {
   hooks: Record<string, () => void>;
 
   // The key of a lambda permission in CloudFormation resources
-  permissionId = 'LogForwardingLambdaPermission';
+  permissionId = "LogForwardingLambdaPermission";
 
-  constructor(serverless: ServerlessInstance, options: ServerlessConfig) {
+  constructor (serverless: ServerlessInstance, options: ServerlessConfig, v3Utils?: ServerlessUtils) {
     this.serverless = serverless;
     this.options = options;
-    this.provider = this.serverless.getProvider('aws');
+    this.provider = this.serverless.getProvider("aws");
     this.hooks = {
-      'package:initialize': this.updateResources.bind(this),
+      "package:initialize": this.updateResources.bind(this)
     };
 
+    Globals.serverless = serverless;
+    if (v3Utils?.log) {
+      Globals.v3Utils = v3Utils;
+    }
+
     // schema for the function section of serverless.yml
-    this.serverless.configSchemaHandler.defineFunctionProperties('aws', {
+    this.serverless.configSchemaHandler.defineFunctionProperties("aws", {
       properties: {
         logForwarding: {
-          type: 'object',
+          type: "object",
           properties: {
             enabled: {
-              type: 'boolean',
-            },
+              type: "boolean"
+            }
           },
-          required: ['enabled'],
-        },
+          required: ["enabled"]
+        }
       },
-      required: [],
+      required: []
     });
 
     // schema for the custom props section of serverless.yml
     this.serverless.configSchemaHandler.defineCustomProperties({
       properties: {
         logForwarding: {
-          type: 'object',
+          type: "object",
           properties: {
-            destinationARN: { type: 'string' },
-            roleArn: { type: 'string' },
-            filterPattern: { type: 'string' },
-            normalizedFilterID: { type: 'string' },
+            destinationARN: { type: "string" },
+            roleArn: { type: "string" },
+            filterPattern: { type: "string" },
+            normalizedFilterID: { type: "string" },
             stages: {
-              type: 'array',
+              type: "array",
               uniqueItems: true,
-              items: { type: 'string' },
+              items: { type: "string" }
             },
-            createLambdaPermission: { type: 'boolean' },
+            createLambdaPermission: { type: "boolean" }
           },
-          required: ['destinationARN'],
-        },
+          required: ["destinationARN"]
+        }
       },
-      required: ['logForwarding'],
+      required: ["logForwarding"]
     });
   }
 
-  loadConfig(): void {
+  loadConfig (): void {
     const { service } = this.serverless;
     if (!service.custom || !service.custom.logForwarding) {
-      throw new Error('Serverless-log-forwarding configuration not provided.');
+      throw new Error("Serverless-log-forwarding configuration not provided.");
     }
     this.config = { ...CONFIG_DEFAULTS, ...service.custom.logForwarding };
     if (this.config.destinationARN === undefined) {
-      throw new Error(
-        'Serverless-log-forwarding is not configured correctly. Please see README for proper setup.',
-      );
+      throw new Error("Serverless-log-forwarding is not configured correctly. Please see README for proper setup.");
     }
   }
 
-  updateResources(): void {
+  updateResources (): void {
     this.loadConfig();
     const stage = this.getStage();
     if (this.config.stages && !this.config.stages.includes(stage)) {
-      this.serverless.cli.log(`Log Forwarding is ignored for ${stage} stage`);
+      Logging.logWarning(`Log Forwarding is ignored for ${stage} stage`);
       return;
     }
-    this.serverless.cli.log('Updating Log Forwarding Resources...');
+    Logging.logInfo("Updating Log Forwarding Resources...");
     const resourceObj = this.createResourcesObj();
     const cfResources = this.getResources();
     _.extend(cfResources, resourceObj);
-    this.serverless.cli.log('Log Forwarding Resources Updated');
+    Logging.logInfo("Log Forwarding Resources Updated");
   }
 
-  private getResources(): ResourcesCF {
+  private getResources (): ResourcesCF {
     const { service } = this.serverless;
     if (service.resources === undefined) {
       service.resources = {
-        Resources: {},
+        Resources: {}
       };
     }
     if (service.resources.Resources === undefined) {
@@ -117,7 +123,7 @@ class LogForwardingPlugin {
     return service.resources.Resources;
   }
 
-  createResourcesObj(): ResourcesCF {
+  createResourcesObj (): ResourcesCF {
     const { service } = this.serverless;
     const resourceObj = {};
 
@@ -144,53 +150,48 @@ class LogForwardingPlugin {
     return resourceObj;
   }
 
-  getFilterId(functionName: string): string {
+  getFilterId (functionName: string): string {
     const filterName = this.config.normalizedFilterID
       ? this.provider.naming.getNormalizedFunctionName(functionName)
       : functionName;
     return `SubscriptionFilter${filterName}`;
   }
 
-  getStage(): string {
+  getStage (): string {
     const { stage } = this.options;
-    if (stage && stage !== '') {
+    if (stage && stage !== "") {
       return stage;
     }
     return this.serverless.service.provider.stage;
   }
 
-  makeSubsctiptionFilter(
-    functionName: string,
-    deps?: string[],
-  ): SubscriptionFilterCF {
+  makeSubsctiptionFilter (functionName: string, deps?: string[]): SubscriptionFilterCF {
     const functionObject = this.serverless.service.getFunction(functionName);
     const logGroupName = this.provider.naming.getLogGroupName(functionObject.name);
     const logGroupId = this.provider.naming.getLogGroupLogicalId(functionName);
-    const roleObject = this.config.roleArn
-      ? { RoleArn: this.config.roleArn }
-      : {};
+    const roleObject = this.config.roleArn ? { RoleArn: this.config.roleArn } : {};
     return {
-      Type: 'AWS::Logs::SubscriptionFilter',
+      Type: "AWS::Logs::SubscriptionFilter",
       Properties: {
         DestinationArn: this.config.destinationARN,
         FilterPattern: this.config.filterPattern,
         LogGroupName: logGroupName,
-        ...roleObject,
+        ...roleObject
       },
-      DependsOn: _.union(deps, [logGroupId]),
+      DependsOn: _.union(deps, [logGroupId])
     };
   }
 
-  makeLambdaPermission(): LambdaPermissionCF {
+  makeLambdaPermission (): LambdaPermissionCF {
     const { region } = this.serverless.service.provider;
     const principal = `logs.${region}.amazonaws.com`;
     return {
-      Type: 'AWS::Lambda::Permission',
+      Type: "AWS::Lambda::Permission",
       Properties: {
         FunctionName: this.config.destinationARN,
-        Action: 'lambda:InvokeFunction',
-        Principal: principal,
-      },
+        Action: "lambda:InvokeFunction",
+        Principal: principal
+      }
     };
   }
 }
