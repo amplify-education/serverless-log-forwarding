@@ -13,7 +13,7 @@ export default class LogWrap {
 
   async getSubscriptionFilter (logGroupName: string, destinationArn: string): Promise<SubscriptionFilter | null> {
     const { subscriptionFilters } = await this.cwlClient.send(new DescribeSubscriptionFiltersCommand({
-      logGroupName: logGroupName
+      logGroupName
     }));
     const filter = subscriptionFilters.find((s) => s.destinationArn === destinationArn);
     if (filter === undefined) {

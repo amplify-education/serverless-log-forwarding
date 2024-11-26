@@ -1,21 +1,45 @@
 import { expect } from "chai";
-import Serverless from "serverless/lib/serverless";
-import AwsProvider from "serverless/lib/plugins/aws/provider";
 import { ServerlessConfig, ServerlessInstance } from "../../src/types";
 import LogForwardingPlugin = require("../../src");
 
 const TEST_DESTINATION_ARN = "arn:aws:lambda:us-moon-1:314159265358:function:testforward-test-forward";
-const createServerless = (config, service) => {
-  const serverless = new Serverless(config);
-  serverless.cli = {
-    log () {
-    }
+
+const createServerless = (service, options) => {
+  const funcLowerName = (name) => name.charAt(0).toLowerCase() + name.slice(1);
+  const funcUpperName = (name) => name.charAt(0).toUpperCase() + name.slice(1);
+
+  service.getFunction = (name: string) => {
+    return {
+      name: funcUpperName(name),
+      ...service.functions[name]
+    };
   };
-  // eslint-disable-next-line no-new
-  new AwsProvider(serverless, config);
-  serverless.service.update(service);
-  serverless.service.setFunctionNames(config);
-  return serverless;
+  return {
+    cli: {
+      log (str: string) {
+      }
+    },
+    providers: {},
+    getProvider (name: string) {
+      const state = options.stage || service.provider.stage;
+      return {
+        naming: {
+          getLogGroupName: (name: string) => `/aws/lambda/${service.service}-${state}-${funcLowerName(name)}`,
+          getNormalizedFunctionName: (name: string) => funcUpperName(name),
+          getLogGroupLogicalId: (name: string) => `${funcUpperName(name)}LogGroup`
+        }
+      };
+    },
+    configSchemaHandler: {
+      defineTopLevelProperty: () => null,
+      defineCustomProperties: () => null,
+      defineFunctionEvent: () => null,
+      defineFunctionEventProperties: () => null,
+      defineFunctionProperties: () => null,
+      defineProvider: () => null
+    },
+    service
+  };
 };
 
 const constructPluginResources = (logForwarding, functions?) => {
@@ -23,7 +47,7 @@ const constructPluginResources = (logForwarding, functions?) => {
     commands: [],
     options: {}
   };
-  const serverless = createServerless(config, {
+  const serverless = createServerless({
     service: "test-service",
     provider: {
       name: "aws",
@@ -46,7 +70,7 @@ const constructPluginResources = (logForwarding, functions?) => {
       },
       testFunctionTwo: {}
     }
-  });
+  }, config);
   return new LogForwardingPlugin(serverless as ServerlessInstance, config as ServerlessConfig);
 };
 const constructPluginNoResources = (logForwarding) => {
@@ -54,7 +78,7 @@ const constructPluginNoResources = (logForwarding) => {
     commands: [],
     options: {}
   };
-  const serverless = createServerless(config, {
+  const serverless = createServerless({
     provider: {
       region: "us-moon-1",
       stage: "test-stage"
@@ -67,7 +91,7 @@ const constructPluginNoResources = (logForwarding) => {
       testFunctionTwo: {}
     },
     service: "test-service"
-  });
+  }, config);
   serverless.service.resources = undefined;
   return new LogForwardingPlugin(serverless as ServerlessInstance, config as ServerlessConfig);
 };
@@ -77,7 +101,7 @@ const constructPluginResourcesWithParam = (logForwarding) => {
     options: {},
     stage: "dev"
   };
-  const serverless = createServerless(options, {
+  const serverless = createServerless({
     provider: {
       name: "aws",
       region: "us-moon-1",
@@ -100,7 +124,7 @@ const constructPluginResourcesWithParam = (logForwarding) => {
       testFunctionTwo: {}
     },
     service: "test-service"
-  });
+  }, options);
   return new LogForwardingPlugin(serverless as ServerlessInstance, options);
 };
 

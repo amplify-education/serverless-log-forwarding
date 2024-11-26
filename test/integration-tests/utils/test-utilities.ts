@@ -1,5 +1,5 @@
 import * as shell from "shelljs";
-import { PLUGIN_IDENTIFIER, RANDOM_STRING, TEMP_DIR } from "../base";
+import { PLUGIN_IDENTIFIER, TEMP_DIR } from "../base";
 
 /**
  * Executes given shell command.
@@ -82,7 +82,7 @@ export async function destroyResources (testName: string): Promise<void> {
  * @returns name of a function's log group
  */
 export function getLogGroup (testName: string, stage: string, functionId: string): string {
-  const functionName = `${PLUGIN_IDENTIFIER}-${testName}-${RANDOM_STRING}-${stage}-${functionId}`;
+  const functionName = `${PLUGIN_IDENTIFIER}-${testName}-${stage}-${functionId}`;
   return `/aws/lambda/${functionName}`;
 }
 

@@ -117,8 +117,7 @@ export interface ServerlessInstance {
 
   configSchemaHandler: ConfigSchemaHandler;
   cli: {
-    log (str: string, entity?: string): void,
-    consoleLog (str: string): void,
+    log (str: string, entity?: string): void
   }
 }
 
