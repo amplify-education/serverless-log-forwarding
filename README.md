@@ -69,8 +69,9 @@ and set AWS_PROFILE environment variable,
 it will be used to create AWS entities for testing purposes
 ```
 export AWS_PROFILE=<profile_name>
-
-npm run integration-test
+export SERVERLESS_LICENSE_KEY=<sls_license_key>
+npx npm run build
+npx npm run integration-test
 ```
 
 All tests should pass. All unit tests should pass before merging.

@@ -1,4 +1,6 @@
-service: ${env:PLUGIN_IDENTIFIER}-create-perm-off-${env:RANDOM_STRING}
+service: ${env:PLUGIN_IDENTIFIER}-create-perm-off
+
+frameworkVersion: "4.2.5"
 
 provider:
   name: aws

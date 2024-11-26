@@ -1,4 +1,6 @@
-service: ${env:PLUGIN_IDENTIFIER}-multiple-producers-${env:RANDOM_STRING}
+service: ${env:PLUGIN_IDENTIFIER}-multiple-producers
+
+frameworkVersion: "4.2.5"
 
 provider:
   name: aws

@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] - 2024-11-26
+
+### Changed
+
+- Dropped Node14.x support.
+- Dropped Serverless 2.x support.
+- Updated npm dependencies to fix security vulnerabilities
+
 ## [3.2.0] - 2024-01-08
 
 ### Fixed
