@@ -3,9 +3,9 @@ import {
   CreateRoleCommand,
   DeleteRoleCommand,
   DetachRolePolicyCommand,
-  IAMClient
+  IAMClient,
+  Role
 } from "@aws-sdk/client-iam";
-import { Role } from "aws-sdk/clients/iam";
 
 const EXECUTION_POLICY_ARN = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole";
 const ASSUME_ROLE_POLICY = {
